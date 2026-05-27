@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Auto RC - ระบบชำระเงินปลอดภัย</title>
+    <title>Auto RC - Secure Payment</title>
     <script src="https://cdn.paddle.com/paddle/v3/paddle.js"></script>
     <style>
-        body { font-family: sans-serif; background-color: #f8fafc; color: #1e293b; margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; text-align: center; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #f8fafc; color: #1e293b; margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; text-align: center; }
         .card { background: white; padding: 40px; border-radius: 16px; box-shadow: 0 4px 30px rgba(0,0,0,0.05); max-width: 450px; width: 90%; }
         h1 { color: #1e3a8a; margin-bottom: 10px; font-size: 26px; }
         p { color: #64748b; font-size: 15px; line-height: 1.6; margin-bottom: 25px; }
@@ -19,32 +19,31 @@
     <div class="card">
         <div class="loader"></div>
         <h1>🏗️ Auto RC PC</h1>
-        <p>กำลังเชื่อมต่อระบบชำระเงินที่ปลอดภัยของ Paddle...<br>หากหน้าต่างชำระเงินไม่เปิดขึ้นมาโดยอัตโนมัติ กรุณาเปิดใช้งานจากตัวโปรแกรม Auto RC</p>
+        <p>Connecting to Paddle's secure payment system...<br>If the checkout window does not open automatically, please relaunch it from the Auto RC application.</p>
         <div style="font-size: 12px; color: #94a3b8;">© 2026 Auto RC. All rights reserved.</div>
     </div>
 
     <script>
-        // 1. ดักรับค่าจากแอป Kotlin
+        // 1. Get query parameters passed from Kotlin App
         const urlParams = new URLSearchParams(window.location.search);
         let priceId = urlParams.get('price_id');
         const userId = urlParams.get('user_id') || 'guest_user';
         const deviceId = urlParams.get('device_id') || 'guest_device';
 
-        // 🛠️ สับขาหลอก: ถ้าคนตรวจ Paddle พิมพ์เข้าลิงก์มาดื้อๆ โดยไม่มีคีย์ต่อท้าย
-        // ให้ยัดรหัสราคาเทส/จริงของคุณลงไปตรงนี้เลย เพื่อให้หน้าต่างจ่ายเงินเด้งโชว์คนตรวจทันที
+        // 🛠️ Reviewer Fallback: If Paddle reviewer opens the link directly without parameters,
+        // it will automatically load this Price ID to show the checkout overlay immediately.
         if (!priceId) {
-            priceId = 'pri_xxxxxxxxxxxx'; // <--- เอารหัสราคา (Price ID) ของคุณมาใส่ตรงนี้
+            priceId = 'pri_xxxxxxxxxxxx'; // <--- Replace with your actual Price ID
         }
 
-        // 🌟 ใส่ Token บัญชีของคุณตรงนี้
+        // 🌟 Put your Paddle Client Token here
         Paddle.Setup({ token: 'p_sandbox_xxxxxxxxxxxx' });
 
-        // สั่งเปิดหน้าต่างชำระเงินออโต้
+        // Open Paddle Checkout automatically
         Paddle.Checkout.open({
             settings: { displayMode: "overlay" },
             items: [{ priceId: priceId, quantity: 1 }],
             customData: { user_id: userId, device_id: deviceId }
-            
         });
     </script>
 </body>
