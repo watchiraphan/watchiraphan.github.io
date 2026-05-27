@@ -42,7 +42,6 @@
         .feature-item { display: flex; align-items: center; margin-bottom: 12px; font-size: 14px; color: #CAF8F4; }
         .feature-icon { color: #55FFFF; margin-right: 12px; font-size: 20px; flex-shrink: 0; }
 
-        /* ปรับแต่งปุ่มราคาให้ดูน่ากดมากขึ้น และตัด pointer-events ด้านในออกเพื่อให้กดติดง่าย */
         .plan-option {
             background: rgba(26, 26, 26, 0.7); 
             border: 2px solid #333333; 
@@ -56,7 +55,6 @@
             justify-content: space-between; 
             align-items: center;
         }
-        /* เอฟเฟกต์ตอนเอาเมาส์ไปชี้หรือกดปุ่มราคา */
         .plan-option:hover {
             border-color: #55FFFF;
             background: rgba(17, 24, 39, 0.8);
@@ -90,34 +88,34 @@
 <body>
 
     <div id="view-plans" class="card-plans">
-        <h1 id="ui-title">อัปเกรดเป็นเวอร์ชัน Pro</h1>
+        <h1 id="ui-title">Upgrade to Pro</h1>
         <div class="features-list">
-            <div class="feature-item"><span class="feature-icon">🔓</span><span id="f1">เข้าถึงทุกโมดูลการออกแบบโครงสร้าง</span></div>
-            <div class="feature-item"><span class="feature-icon">📄</span><span id="f2">ส่งออกรายการคำนวณ, รายการตัดเหล็ก, ใบประมาณราคา</span></div>
-            <div class="feature-item"><span class="feature-icon">🏢</span><span id="f3">ส่งออกโมเดลโครงสร้าง และ ไฟล์ CAD</span></div>
+            <div class="feature-item"><span class="feature-icon">🔓</span><span id="f1">Full access to all Structural Modules</span></div>
+            <div class="feature-item"><span class="feature-icon">📄</span><span id="f2">Export Calculation, Bar Cut List, BOQ Report</span></div>
+            <div class="feature-item"><span class="feature-icon">🏢</span><span id="f3">Export Structural Model and CAD Drawing</span></div>
         </div>
 
         <div class="plan-option" id="plan-monthly">
             <div>
-                <div class="plan-title" id="t-monthly">สมาชิกรายเดือน</div>
-                <div class="plan-desc" id="d-monthly">ยกเลิกได้ทุกเมื่อ</div>
+                <div class="plan-title" id="t-monthly">Monthly Plan</div>
+                <div class="plan-desc" id="d-monthly">Cancel anytime</div>
             </div>
             <div class="plan-price">$15.99</div>
         </div>
 
         <div class="plan-option" id="plan-yearly">
             <div>
-                <div class="plan-title"><span id="t-yearly">สมาชิกรายปี</span><span class="save-badge" id="b-yearly">ประหยัด 33%</span></div>
-                <div class="plan-desc" id="d-yearly">คุ้มค่าที่สุด</div>
+                <div class="plan-title"><span id="t-yearly">Yearly Plan</span><span class="save-badge" id="b-yearly">Save 33%</span></div>
+                <div class="plan-desc" id="d-yearly">Best Value</div>
             </div>
             <div class="plan-price">$129.99</div>
         </div>
 
         <div class="footer-links">
-            <a onclick="alert('ระบบกำลังดำเนินการกู้คืนรายการ...')">กู้คืนรายการ</a>
-            <a href="https://autorc-design.carrd.co/#refund" target="_blank">นโยบายการคืนเงิน</a>
-            <a href="https://autorc-design.carrd.co/#privacy" target="_blank">ความเป็นส่วนตัว</a>
-            <a href="https://autorc-design.carrd.co/#terms" target="_blank">เงื่อนไขการบริการ</a>
+            <a id="lnk-restore" onclick="alert('System is processing item restoration...')">Restore Purchase</a>
+            <a href="https://autorc-design.carrd.co/#refund" target="_blank" id="lnk-refund">Refund Policy</a>
+            <a href="https://autorc-design.carrd.co/#privacy" target="_blank" id="lnk-privacy">Privacy</a>
+            <a href="https://autorc-design.carrd.co/#terms" target="_blank" id="lnk-terms">Terms of Service</a>
         </div>
     </div>
 
@@ -125,7 +123,7 @@
         <div class="loader"></div>
         <div class="loading-text">
             <b style="color: white; font-size: 20px;">Auto RC PC</b><br><br>
-            <span id="load-msg">กำลังเชื่อมต่อกับระบบชำระเงิน Paddle ปลอดภัย...</span>
+            <span id="load-msg">Connecting to Paddle's secure payment system...</span>
         </div>
     </div>
 
@@ -134,26 +132,31 @@
         let priceId = urlParams.get('price_id');
         const userId = urlParams.get('user_id') || 'review_user';
         const deviceId = urlParams.get('device_id') || 'review_device';
-        const lang = urlParams.get('lang') || 'thai';
+        // 🌟 เปลี่ยน Default ให้เป็นสากล (ถ้าไม่มีการส่งค่ามา ให้ถือว่าเป็น 'en')
+        const lang = urlParams.get('lang') || 'en'; 
 
         Paddle.Setup({ token: 'test_4c6336ab0eb5b58c83150a6fe29' });
 
+        // ตรวจจับเงื่อนไขสลับหน้าจ่ายเงินอัตโนมัติ
         if (priceId && priceId.trim() !== '' && priceId.startsWith('pri_')) {
             document.getElementById('view-plans').style.display = 'none';
             document.getElementById('view-loading').style.display = 'block';
-            if(lang !== 'thai') { document.getElementById('load-msg').innerText = "Connecting to Paddle's secure payment system..."; }
+            
+            // ถ้าเป็นภาษาไทย ให้สลับคำตอนโหลดดิ้ง
+            if(lang === 'thai') { 
+                document.getElementById('load-msg').innerText = "กำลังเชื่อมต่อกับระบบชำระเงิน Paddle ปลอดภัย..."; 
+            }
+            
             setTimeout(() => { openPaddle(priceId); }, 400);
         }
 
-        // 🚀 ดักจับการคลิกที่กล่องราคาโดยตรง จิ้มอันไหน ส่งค่านั้นไปเปิด Paddle ทันที!
+        // ระบบ 1-Tap Click จิ้มปุ๊บ บินเข้าหน้าต่าง Paddle ทันที
         document.querySelectorAll('.plan-option').forEach(function(el) {
             el.addEventListener('click', function() {
-                let selectedId = 'pri_01ksm1vzz6zg2hayb8zmenvnb4'; // ค่าเริ่มต้นรายเดือน
-                
+                let selectedId = 'pri_01ksm1vzz6zg2hayb8zmenvnb4'; // รายเดือน
                 if (this.id === 'plan-yearly') {
-                    selectedId = 'pri_01ksm1s4zxbadbeaxhbp3rg3fz'; // ถ้ารายปีสลับไอดีมานี่
+                    selectedId = 'pri_01ksm1s4zxbadbeaxhbp3rg3fz'; // รายปี
                 }
-                
                 openPaddle(selectedId);
             });
         });
@@ -166,20 +169,26 @@
                     customData: { user_id: userId, device_id: deviceId }
                 });
             } catch (e) {
-                alert("ระบบขัดข้องชั่วคราว! กรุณาลองใหม่อีกครั้ง");
+                alert(lang === 'thai' ? "ระบบขัดข้องชั่วคราว! กรุณาลองใหม่อีกครั้ง" : "Temporary error! Please try again.");
             }
         }
 
-        if (lang !== 'thai') {
-            document.getElementById('ui-title').innerText = 'Upgrade to Pro';
-            document.getElementById('f1').innerText = 'Full access to all Structural Modules';
-            document.getElementById('f2').innerText = 'Export Calculation, Bar Cut List, BOQ Report';
-            document.getElementById('f3').innerText = 'Export Structural Model and CAD Drawing';
-            document.getElementById('t-monthly').innerText = 'Monthly Plan';
-            document.getElementById('d-monthly').innerText = 'Cancel anytime';
-            document.getElementById('t-yearly').innerText = 'Yearly Plan';
-            document.getElementById('b-yearly').innerText = 'Save 33%';
-            document.getElementById('d-yearly').innerText = 'Best Value';
+        // 🚨 สลับมาเป็นภาษาไทยต่อเมื่อ URL สั่งการชัดเจนเจาะจงเท่านั้น เช่น ?lang=thai
+        if (lang === 'thai') {
+            document.getElementById('ui-title').innerText = 'อัปเกรดเป็นเวอร์ชัน Pro';
+            document.getElementById('f1').innerText = 'เข้าถึงทุกโมดูลการออกแบบโครงสร้าง';
+            document.getElementById('f2').innerText = 'ส่งออกรายการคำนวณ, รายการตัดเหล็ก, ใบประมาณราคา';
+            document.getElementById('f3').innerText = 'ส่งออกโมเดลโครงสร้าง และ ไฟล์ CAD';
+            document.getElementById('t-monthly').innerText = 'สมาชิกรายเดือน';
+            document.getElementById('d-monthly').innerText = 'ยกเลิกได้ทุกเมื่อ';
+            document.getElementById('t-yearly').innerText = 'สมาชิกรายปี';
+            document.getElementById('b-yearly').innerText = 'ประหยัด 33%';
+            document.getElementById('d-yearly').innerText = 'คุ้มค่าที่สุด';
+            document.getElementById('lnk-restore').innerText = 'กู้คืนรายการ';
+            document.getElementById('lnk-restore').setAttribute('onclick', "alert('ระบบกำลังดำเนินการกู้คืนรายการ...')");
+            document.getElementById('lnk-refund').innerText = 'นโยบายการคืนเงิน';
+            document.getElementById('lnk-privacy').innerText = 'ความเป็นส่วนตัว';
+            document.getElementById('lnk-terms').innerText = 'เงื่อนไขการบริการ';
         }
     </script>
 </body>
