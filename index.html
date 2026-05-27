@@ -18,7 +18,7 @@
             min-height: 100vh; 
         }
 
-        /* 📦 [ตั้งค่าเริ่มต้น] ให้แสดงหน้าตู้ขายของทันทีตั้งแต่โหลดเสร็จ ป้องกันจอดำ */
+        /* 📦 หน้าสไตล์ตู้ขายของ (Plan Selection) - โชว์ทันทีเป็น Default */
         .card-plans { 
             background: #111111; 
             padding: 30px; 
@@ -28,10 +28,11 @@
             max-width: 450px; 
             width: 90%; 
             text-align: center;
-            display: block; /* 🌟 โชว์ทันทีเป็น Default */
+            display: block; 
         }
 
-        h1 { color: #3b82f6; margin-bottom: 20px; font-size: 24px; font-weight: bold; }
+        /* 💎 เปลี่ยนสีหัวข้อหลักเป็นฟ้า #55FFFF */
+        h1 { color: #55FFFF; margin-bottom: 20px; font-size: 24px; font-weight: bold; }
         
         .features-list { text-align: left; margin: 20px auto; max-width: 380px; }
         .feature-item { display: flex; align-items: center; margin-bottom: 12px; font-size: 14px; color: #CAF8F4; }
@@ -42,25 +43,34 @@
             margin-bottom: 12px; text-align: left; cursor: pointer; transition: all 0.2s;
             display: flex; justify-content: space-between; align-items: center;
         }
-        .plan-option.selected { border-color: #3b82f6; background: #111827; }
+        /* เส้นขอบตอนเลือกแผนเป็นสีฟ้า #55FFFF */
+        .plan-option.selected { border-color: #55FFFF; background: #111827; }
         .plan-title { font-weight: bold; font-size: 16px; color: #ffffff; }
         .plan-desc { font-size: 12px; color: #94a3b8; margin-top: 4px; }
         .save-badge { background: #22c55e; color: #ffffff; font-size: 11px; padding: 2px 6px; border-radius: 4px; margin-left: 8px; }
-        .plan-price { font-size: 18px; font-weight: bold; color: #3b82f6; }
+        /* สีตัวเลขราคาเป็นฟ้า #55FFFF */
+        .plan-price { font-size: 18px; font-weight: bold; color: #55FFFF; }
 
-        .btn-primary { background: #3b82f6; color: #000000; border: none; border-radius: 12px; width: 100%; padding: 14px; font-size: 16px; font-weight: 800; cursor: pointer; margin-top: 15px; }
-        .btn-trial { background: transparent; color: #3b82f6; border: 1px solid #3b82f6; border-radius: 12px; width: 100%; padding: 12px; font-size: 14px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        /* ปุ่มหลักสีฟ้า #55FFFF ตัวหนังสือดำเข้ม */
+        .btn-primary { background: #55FFFF; color: #000000; border: none; border-radius: 12px; width: 100%; padding: 14px; font-size: 16px; font-weight: 800; cursor: pointer; margin-top: 15px; }
+        .btn-primary:hover { background: #33e6e6; }
+        
+        /* ปุ่มทดลองใช้เส้นขอบฟ้า #55FFFF */
+        .btn-trial { background: transparent; color: #55FFFF; border: 1px solid #55FFFF; border-radius: 12px; width: 100%; padding: 12px; font-size: 14px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .btn-trial:hover { background: rgba(85, 255, 255, 0.1); }
+        
         .footer-links { display: flex; justify-content: space-evenly; margin-top: 25px; font-size: 11px; }
         .footer-links a { color: #64748b; text-decoration: underline; cursor: pointer; }
 
         /* 🌀 หน้าโหลดดิ้งออโต้ */
         .card-loading {
             text-align: center;
-            display: none; /* ซ่อนไว้ก่อน ค่อยสั่งเปิดด้วย JS เมื่อเจอข้อมูลจากแอป */
+            display: none; 
         }
+        /* วงกลมโหลดดิ่งขอบบนเปลี่ยนเป็นฟ้า #55FFFF */
         .loader { 
             border: 4px solid #222222; 
-            border-top: 4px solid #3b82f6; 
+            border-top: 4px solid #55FFFF; 
             border-radius: 50%; width: 50px; height: 50px; 
             animation: spin 1s linear infinite; margin: 0 auto 20px; 
         }
@@ -83,7 +93,7 @@
                 <div class="plan-title" id="t-monthly">สมาชิกรายเดือน</div>
                 <div class="plan-desc" id="d-monthly">ยกเลิกได้ทุกเมื่อ</div>
             </div>
-            <div class="plan-price">฿149</div>
+            <div class="plan-price">$15.99</div>
         </div>
 
         <div class="plan-option" onclick="selectPlan('Yearly', 'pri_01ksm1s4zxbadbeaxhbp3rg3fz')" id="plan-yearly">
@@ -91,7 +101,7 @@
                 <div class="plan-title"><span id="t-yearly">สมาชิกรายปี</span><span class="save-badge" id="b-yearly">ประหยัด 33%</span></div>
                 <div class="plan-desc" id="d-yearly">คุ้มค่าที่สุด</div>
             </div>
-            <div class="plan-price">฿1,190</div>
+            <div class="plan-price">$129.99</div>
         </div>
 
         <button class="btn-trial" id="btn-trial" onclick="checkout()">เริ่มทดลองใช้ฟรี 7 วัน</button>
@@ -109,24 +119,25 @@
         <div class="loader"></div>
         <div class="loading-text">
             <b style="color: white; font-size: 20px;">Auto RC PC</b><br><br>
-            <span id="load-msg">กำลังเชื่อมต่อกับระบบชำระเงิน Paddle ปลอดไข...</span>
+            <span id="load-msg">กำลังเชื่อมต่อกับระบบชำระเงิน Paddle ปลอดภัย...</span>
         </div>
     </div>
 
     <script>
-        // 1. ดักรับค่าจาก URL
         const urlParams = new URLSearchParams(window.location.search);
         let priceId = urlParams.get('price_id');
         const userId = urlParams.get('user_id') || 'review_user';
         const deviceId = urlParams.get('device_id') || 'review_device';
         const lang = urlParams.get('lang') || 'thai';
 
-        // 🌟 ตั้งราคาค่าเริ่มต้น (Default Price) ป้องกันกรณีหาราคาจากแอปไม่เจอ
+        // 🌟 บัญชี Sandbox Token ของคุณ
+        Paddle.Setup({ token: 'test_4c6336ab0eb5b58c83150a6fe29' });
+
+        // ราคา Default ตัวเลือกแรก (รายเดือน) กรณีหาไอดีจากแอปไม่พบ
         let currentPriceId = 'pri_01ksm1vzz6zg2hayb8zmenvnb4'; 
 
-        // 🔄 จัดการตรวจสอบเงื่อนไขแบบปลอดภัยสูงสุด
+        // ระบบเลือกหน้าจออัตโนมัติแบบเซฟตี้ 
         if (priceId && priceId.trim() !== '' && priceId.startsWith('pri_')) {
-            // กรณีเจอราคาถูกต้องจากแอป -> สับหน้าจอไปโชว์หน้าโหลดดิ้งแทนหน้าเลือกแผน
             currentPriceId = priceId;
             document.getElementById('view-plans').style.display = 'none';
             document.getElementById('view-loading').style.display = 'block';
@@ -135,27 +146,12 @@
                 document.getElementById('load-msg').innerText = "Connecting to Paddle's secure payment system...";
             }
             
-            // สั่งเปิดหน้าต่างชำระเงินออโต้หลังจากโหลดเสร็จแป๊บนึง
-            setTimeout(() => { initializePaddleAndCheckout(); }, 400);
+            setTimeout(() => { checkout(); }, 400);
         } else {
-            // กรณีไม่มีข้อมูล หรือ ข้อมูลราคาเพี้ยน -> เว็บจะค้างอยู่ที่หน้าตู้ขายของ (view-plans) เสมอตามค่าที่เราเซ็ตไว้ใน CSS
-            console.log("โหมดหน้าตู้ขายของทำงาน: ใช้ราคา Default รายเดือน");
-            initializePaddleAndCheckout(false); // เรียกโหลดสคริปต์ Paddle รอไว้ด้านหลังแบบเงียบๆ
+            // หน้าตู้ขายของเปิดสแตนด์บายรอไว้แล้วเงียบๆ สั่ง Paddle โหลดรอด้านหลังได้เลย
+            console.log("โหมดหน้าตู้ขายของสแตนด์บายทำงานราบรื่น");
         }
 
-        // ฟังก์ชันโหลดระบบความปลอดภัยของ Paddle และสั่งทำงาน
-        function initializePaddleAndCheckout(autoOpen = true) {
-            try {
-                Paddle.Setup({ token: 'test_4c6336ab0eb5b58c83150a6fe29' });
-                if (autoOpen) {
-                    checkout();
-                }
-            } catch (error) {
-                console.error("Paddle SDK เกิดข้อผิดพลาด แต่หน้าเว็บจะไม่พังค้างดำแน่นอน:", error);
-            }
-        }
-
-        // ฟังก์ชันสลับการเลือกการ์ดแผนราคา
         function selectPlan(plan, pId) {
             currentPriceId = pId;
             document.getElementById('plan-monthly').classList.remove('selected');
@@ -167,7 +163,6 @@
             }
         }
 
-        // ฟังก์ชันเปิดหน้าต่างจ่ายเงินของ Paddle
         function checkout() {
             try {
                 Paddle.Checkout.open({
@@ -176,11 +171,11 @@
                     customData: { user_id: userId, device_id: deviceId }
                 });
             } catch (e) {
-                alert("ระบบ Checkout ขัดข้องชั่วคราว โปรดเลือกแผนการใช้งานใหม่อีกครั้งบนหน้าเว็บ");
+                alert("ระบบขัดข้องชั่วคราว โปรดเลือกแผนการใช้งานใหม่อีกครั้งบนหน้าจอ");
             }
         }
 
-        // 🌍 ระบบสลับภาษาอัตโนมัติ
+        // 🌍 แผงคำแปลภาษาภาษาอังกฤษ
         if (lang !== 'thai') {
             document.getElementById('ui-title').innerText = 'Upgrade to Pro';
             document.getElementById('f1').innerText = 'Full access to all Structural Modules';
