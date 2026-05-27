@@ -11,7 +11,7 @@
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
             background-color: #000000; 
             
-            /* ภาพฉากหลัง PNG ของคุณ */
+            /* ภาพฉากหลัง PNG */
             background-image: url('เพิ่มหัวเรื่องย่อย-3-2.png'); 
             
             background-size: cover;
@@ -23,7 +23,7 @@
             margin: 0; 
             display: flex; 
             
-            /* 🌟 [แก้ไข] ดันโครงสร้างทั้งหมดในหน้าจอให้มาชิดฝั่งซ้ายสุด */
+            /* 🌟 บังคับโครงสร้างหน้าจอให้ชิดซ้ายสุด */
             justify-content: flex-start; 
             align-items: center; 
             min-height: 100vh; 
@@ -44,7 +44,7 @@
             text-align: center;
             display: block; 
             
-            /* 🌟 [แก้ไข] เพิ่มระยะห่างจากขอบจอซ้ายมือ 50px เพื่อความสวยงาม */
+            /* 🌟 ระยะห่างปลอดภัยจากขอบจอซ้ายมือ 50px */
             margin-left: 50px; 
         }
 
@@ -76,7 +76,7 @@
         .footer-links { display: flex; justify-content: space-evenly; margin-top: 25px; font-size: 11px; }
         .footer-links a { color: #64748b; text-decoration: underline; cursor: pointer; }
 
-        /* 🌀 หน้าโหลดดิ้งออโต้ - ชิดซ้ายให้สอดคล้องกัน */
+        /* 🌀 หน้าโหลดดิ้งออโต้ - ชิดซ้ายระยะเท่ากันเวลาเปลี่ยนหน้า */
         .card-loading {
             background: rgba(17, 17, 17, 0.6);
             backdrop-filter: blur(10px);
@@ -89,8 +89,6 @@
             width: 90%;
             text-align: center;
             display: none; 
-            
-            /* 🌟 [แก้ไข] ให้กล่องโหลดดิ้งชิดซ้ายระยะเท่ากันเวลาเปลี่ยนหน้า */
             margin-left: 50px; 
         }
         .loader { 
@@ -102,7 +100,7 @@
         .loading-text { color: #cbd5e1; font-size: 16px; line-height: 1.6; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* 📱 จัดการหน้าจอขนาดเล็ก (มือถือ) ให้กลับมาตรงกลางอัตโนมัติ ไม่ให้หลุดขอบจอ */
+        /* 📱 จัดการหน้าจอมือถือให้กลับมาตรงกลางอัตโนมัติ */
         @media (max-width: 600px) {
             body { justify-content: center; }
             .card-plans, .card-loading { margin-left: 0; }
@@ -163,7 +161,6 @@
 
         Paddle.Setup({ token: 'test_4c6336ab0eb5b58c83150a6fe29' });
 
-        // เก็บค่านำส่งราคาปัจจุบันไว้ที่นี่
         let currentPriceId = 'pri_01ksm1vzz6zg2hayb8zmenvnb4'; 
 
         if (priceId && priceId.trim() !== '' && priceId.startsWith('pri_')) {
@@ -178,15 +175,13 @@
             setTimeout(() => { checkout(); }, 400);
         }
 
-        // 🌟 [แก้ไข Logic ตรงนี้ใหม่ทั้งหมด] เพื่อให้การคลิกสลับเปลี่ยนราคาทำงานสมบูรณ์
+        // 🌟 [แก้ไขเรียบร้อย] ล้างแคชขยะและตัวอักษรล่องหนออกทั้งหมด ฟังก์ชันกลับมาทำงานสมบูรณ์แล้วครับ
         function selectPlan(plan, pId) {
-            currentPriceId = pId; // เปลี่ยนค่าไอดีของแผนชำระเงินตามจริง
+            currentPriceId = pId; 
             
-            // ล้างสถานะไฟสีฟ้าดวงเก่าออกก่อน
             document.getElementById('plan-monthly').classList.remove('selected');
             document.getElementById('plan-yearly').classList.remove('selected');
             
-            // สลับการเปิดไฟเส้นขอบสีฟ้าไปที่แผนที่ถูกกดเลือกจริง
             if(plan === 'Monthly') {
                 document.getElementById('plan-monthly').classList.add('selected');
             } else {
