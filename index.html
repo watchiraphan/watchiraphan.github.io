@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Auto RC PC - Premium Upgrade</title>
-    <script src="https://cdn.paddle.com/paddle/v3/paddle-sandbox.js"></script> //<script src="https://cdn.paddle.com/paddle/v3/paddle.js"></script> 
+    <script src="https://cdn.paddle.com/paddle/v3/paddle-sandbox.js"></script> 
     <style>
         body { 
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
@@ -67,7 +67,6 @@
         .save-badge { background: #22c55e; color: #ffffff; font-size: 11px; padding: 2px 6px; border-radius: 4px; margin-left: 8px; }
         .plan-price { font-size: 20px; font-weight: bold; color: #55FFFF; }
 
-        /* สไตล์ปุ่มทดลองใช้ฟรี สวยหรูสไตล์ขอบฟ้าโปร่งแสง */
         .btn-trial { 
             background: transparent; 
             color: #55FFFF; 
@@ -95,7 +94,7 @@
             max-width: 450px; width: 90%; text-align: center; display: none; margin-left: 50px; 
         }
         .loader { border: 4px solid #222222; border-top: 4px solid #55FFFF; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 0 auto 20px; }
-        .loader-text { color: #cbd5e1; font-size: 16px; line-height: 1.6; }
+        .loading-text { color: #cbd5e1; font-size: 16px; line-height: 1.6; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         @media (max-width: 600px) {
@@ -149,14 +148,12 @@
     </div>
 
     <script>
-        // 1. แกะพารามิเตอร์ URL ป้องกันค่า null
         const urlParams = new URLSearchParams(window.location.search);
         let priceId = urlParams.get('price_id') || '';
         const userId = urlParams.get('user_id') || 'review_user';
         const deviceId = urlParams.get('device_id') || 'review_device';
         const lang = urlParams.get('lang') || 'en'; 
 
-        // 2. 🚀 แปลภาษาทันทีเป็นลำดับแรกสุดเพื่อให้ UI สลับโหมดภาษาไทยสมบูรณ์แบบ
         if (lang === 'thai') {
             document.getElementById('ui-title').innerText = 'อัปเกรดเป็นเวอร์ชัน Pro';
             document.getElementById('f1').innerText = 'เข้าถึงทุกโมดูลการออกแบบโครงสร้าง';
@@ -175,21 +172,26 @@
             document.getElementById('lnk-terms').innerText = 'เงื่อนไขการบริการ';
         }
 
-        // 3. เริ่มสแตนด์บายเอนจิ้นของ Paddle v3 บังคับคุมภาษาหน้าฟอร์มกรอกบัตรเครดิต
-        Paddle.Setup({ 
-            token: 'test_4c6336ab0eb5b58c83150a6fe29',
-            settings: {
-                locale: lang === 'thai' ? 'th' : 'en'
-            }
-        });
+        // ดักจับกรณีออบเจกต์ Paddle ไม่ถูกโหลด ป้องกันหน้าเว็บค้างไร้การตอบสนอง
+        if (typeof Paddle !== 'undefined') {
+            Paddle.Setup({ 
+                token: 'test_4c6336ab0eb5b58c83150a6fe29',
+                settings: {
+                    locale: lang === 'thai' ? 'th' : 'en'
+                }
+            });
+        } else {
+            console.error("🚨 [Critical Error] Paddle SDK cannot be initialized due to network blocking.");
+        }
 
-        // 4. 🔥 [ปรับปรุงแก้ไขสมบูรณ์] ฟังก์ชันดึงราคาจำลองแบบล็อคพื้นที่ให้อ่านเจอ 100%
         function fetchPaddlePrices() {
             const defaultMonthly = "15.99 $";
             const defaultYearly = "129.99 $";
         
-            console.log("🚀 [Diagnostic] Starting Paddle.PricePreview request...");
-        
+            if (typeof Paddle === 'undefined') {
+                return;
+            }
+
             Paddle.PricePreview({
                 items: [
                     { priceId: 'pri_01ksm1vzz6zg2hayb8zmenvnb4', quantity: 1 }, 
@@ -199,73 +201,26 @@
                     countryCode: 'US'
                 }
             }).then((result) => {
-                // 🔬 วินิจฉัยจุดที่ 1: ตรวจสอบข้อมูลดิบที่ Paddle ตอบกลับมาทั้งหมด
-                console.log("📥 [Diagnostic] Full Raw Result from Paddle:", JSON.stringify(result, null, 2));
-        
                 if (!result || !result.data || !result.data.details || !result.data.details.lineItems || result.data.details.lineItems.length === 0) {
-                    console.error("⚠️ [Diagnostic] Verification Failed: Data structure is incomplete or lineItems is empty.");
-                    
-                    // วินิจฉัยเจาะลึกว่าวัตถุตัวไหนที่ขาดหายไป
-                    console.log("🔍 [Diagnostic] Structural Check:", {
-                        hasResult: !!result,
-                        hasData: result ? !!result.data : false,
-                        hasDetails: (result && result.data) ? !!result.data.details : false,
-                        hasLineItems: (result && result.data && result.data.details) ? !!result.data.details.lineItems : false
-                    });
-        
-                    document.querySelector('#plan-monthly .plan-price').innerText = defaultMonthly;
-                    document.querySelector('#plan-yearly .plan-price').innerText = defaultYearly;
                     return;
                 }
         
-                console.log(`📦 [Diagnostic] Found ${result.data.details.lineItems.length} items in response. Mapping prices...`);
-                let matchedCount = 0;
-        
-                result.data.details.lineItems.forEach((item, index) => {
+                result.data.details.lineItems.forEach((item) => {
                     const formattedPrice = item.totals ? item.totals.totalFormated : null; 
-                    
-                    // 🔬 วินิจฉัยจุดที่ 2: ตรวจสอบคุณสมบัติภายในของไอเทมแต่ละตัวในอาเรย์
-                    console.log(`🔹 [Item ${index}] ID Check:`, {
-                        expectedPriceId_Field: item.priceId, // เผื่อโครงสร้าง v3 สลับฟิลด์
-                        actualId_Field: item.id,
-                        readPriceFormat: formattedPrice
-                    });
                     
                     if (item.id === 'pri_01ksm1vzz6zg2hayb8zmenvnb4' || item.priceId === 'pri_01ksm1vzz6zg2hayb8zmenvnb4') {
                         document.querySelector('#plan-monthly .plan-price').innerText = formattedPrice || defaultMonthly;
-                        matchedCount++;
                     } else if (item.id === 'pri_01ksm1s4zxbadbeaxhbp3rg3fz' || item.priceId === 'pri_01ksm1s4zxbadbeaxhbp3rg3fz') {
                         document.querySelector('#plan-yearly .plan-price').innerText = formattedPrice || defaultYearly;
-                        matchedCount++;
                     }
                 });
-        
-                if (matchedCount < 2) {
-                    console.warn(`⚠️ [Diagnostic] Warning: Matched only ${matchedCount}/2 prices. Check if Price IDs in Dashboard match exactly.`);
-                } else {
-                    console.log("✅ [Diagnostic] All prices successfully resolved and injected into UI.");
-                }
-        
             }).catch((error) => {
-                // 🔬 วินิจฉัยจุดที่ 3: จับความผิดพลาดกรณีเน็ตหลุด คีย์พัง หรือโดนบล็อก CORS
-                console.error("🚨 [Diagnostic] Paddle PricePreview CRITICAL ERROR: ", error);
-                
-                if (error instanceof Error) {
-                    console.error("📋 [Diagnostic] Error Message:", error.message);
-                    console.error("🗂️ [Diagnostic] Error Stack:", error.stack);
-                } else {
-                    console.error("📦 [Diagnostic] Raw Error Object:", JSON.stringify(error, null, 2));
-                }
-        
-                document.querySelector('#plan-monthly .plan-price').innerText = defaultMonthly;
-                document.querySelector('#plan-yearly .plan-price').innerText = defaultYearly;
+                console.error("Paddle PricePreview Catch Error: ", error);
             });
         }
 
-        // เรียกใช้งานฟังก์ชันดึงราคา
         fetchPaddlePrices();
 
-        // 5. ลอจิกเปิดบิลอัตโนมัติหากส่งค่ามาจากในแอป
         if (priceId && priceId.trim() !== '' && priceId.startsWith('pri_')) {
             document.getElementById('view-plans').style.display = 'none';
             document.getElementById('view-loading').style.display = 'block';
@@ -275,18 +230,16 @@
             setTimeout(() => { openPaddle(priceId); }, 400);
         }
 
-        // ระบบจับแรงกดเลือกกล่องราคาแมนนวล
         document.querySelectorAll('.plan-option').forEach(function(el) {
             el.addEventListener('click', function() {
-                let selectedId = 'pri_01ksm1vzz6zg2hayb8zmenvnb4'; // รายเดือน
+                let selectedId = 'pri_01ksm1vzz6zg2hayb8zmenvnb4';
                 if (this.id === 'plan-yearly') {
-                    selectedId = 'pri_01ksm1s4zxbadbeaxhbp3rg3fz'; // รายปี
+                    selectedId = 'pri_01ksm1s4zxbadbeaxhbp3rg3fz';
                 }
                 openPaddle(selectedId);
             });
         });
 
-        // ปุ่มกดทดลองงาน 7 วันฟรี
         const trialBtn = document.getElementById('btn-trial');
         if (trialBtn) {
             trialBtn.addEventListener('click', function() {
@@ -294,8 +247,11 @@
             });
         }
 
-        // ฟังก์ชันหัวใจหลักในการเปิดใช้งาน Overlay ชำระเงินของ Paddle
         function openPaddle(targetPriceId) {
+            if (typeof Paddle === 'undefined') {
+                alert(lang === 'thai' ? "ไม่สามารถเชื่อมต่อกับระบบ Paddle ได้ในขณะนี้ กรุณาตรวจสอบตัวบล็อกโฆษณา (AdBlocker) หรือ VPN ของคุณ" : "Cannot connect to Paddle. Please check your AdBlocker or VPN settings.");
+                return;
+            }
             try {
                 Paddle.Checkout.open({
                     settings: { 
