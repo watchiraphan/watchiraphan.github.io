@@ -150,7 +150,7 @@
 
     <script>
         const urlParams = new URLSearchParams(window.location.search);
-        let priceId = urlParams.get('price_id');
+        let priceId = urlParams.get('price_id') || '';
         const userId = urlParams.get('user_id') || 'review_user';
         const deviceId = urlParams.get('device_id') || 'review_device';
         const lang = urlParams.get('lang') || 'en'; 
