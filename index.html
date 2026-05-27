@@ -3,99 +3,190 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Auto RC - Secure Payment</title>
+    <title>Auto RC PC - Premium Upgrade</title>
     <script src="https://cdn.paddle.com/paddle/v3/paddle.js"></script>
     <style>
-        /* [USER_REQUEST] 1. ธีมหลักเป็นสีดำ (Dark Mode) */
+        /* 🎨 คุมโทนสีหลัก (DeepBlack & Dark Theme) */
         body { 
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
-            background-color: #000000; /* พื้นหลังดำสนิท */
-            color: #f1f5f9; /* สีข้อความทั่วไปขาวนวล */
+            background-color: #000000; 
+            color: #CAF8F4; 
             margin: 0; 
             display: flex; 
             justify-content: center; 
             align-items: center; 
-            height: 100vh; 
-            text-align: center; 
+            min-height: 100vh; 
         }
 
-        /* การ์ดคอนเทนเนอร์ปรับให้เข้ากับ Dark Mode */
-        .card { 
-            background: #111111; /* สีพื้นหลังการ์ดดำเข้ม (อ่อนกว่า body นิดหน่อย) */
-            padding: 40px; 
+        /* -------------------------------------------
+           📦 [โหมดที่ 1] หน้าสไตล์ตู้ขายของ (Plan Selection)
+        ------------------------------------------- */
+        .card-plans { 
+            background: #111111; 
+            padding: 30px; 
             border-radius: 16px; 
-            border: 1px solid #222222; /* เพิ่มเส้นขอบบางๆ */
-            box-shadow: 0 4px 30px rgba(0,0,0,0.5); /* ปรับเงาให้เข้ากับธีมดำ */
+            border: 1px solid #222222; 
+            box-shadow: 0 4px 30px rgba(0,0,0,0.7); 
             max-width: 450px; 
             width: 90%; 
+            text-align: center;
+            display: none; /* ซ่อนไว้ก่อน เดี๋ยวใช้ JS สั่งเปิด */
         }
 
-        /* [USER_REQUEST] 2. โหลดดิ้งขอสีฟ้า */
+        h1 { color: #3b82f6; margin-bottom: 20px; font-size: 24px; font-weight: bold; }
+        
+        .features-list { text-align: left; margin: 20px auto; max-width: 380px; }
+        .feature-item { display: flex; align-items: center; margin-bottom: 12px; font-size: 14px; color: #CAF8F4; }
+        .feature-icon { color: #55FFFF; margin-right: 12px; font-size: 20px; flex-shrink: 0; }
+
+        .plan-option {
+            background: #1a1a1a; border: 2px solid #333333; border-radius: 12px; padding: 16px;
+            margin-bottom: 12px; text-align: left; cursor: pointer; transition: all 0.2s;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .plan-option.selected { border-color: #3b82f6; background: #111827; }
+        .plan-title { font-weight: bold; font-size: 16px; color: #ffffff; }
+        .plan-desc { font-size: 12px; color: #94a3b8; margin-top: 4px; }
+        .save-badge { background: #22c55e; color: #ffffff; font-size: 11px; padding: 2px 6px; border-radius: 4px; margin-left: 8px; }
+        .plan-price { font-size: 18px; font-weight: bold; color: #3b82f6; }
+
+        .btn-primary { background: #3b82f6; color: #000000; border: none; border-radius: 12px; width: 100%; padding: 14px; font-size: 16px; font-weight: 800; cursor: pointer; margin-top: 15px; }
+        .btn-trial { background: transparent; color: #3b82f6; border: 1px solid #3b82f6; border-radius: 12px; width: 100%; padding: 12px; font-size: 14px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .footer-links { display: flex; justify-content: space-evenly; margin-top: 25px; font-size: 11px; }
+        .footer-links a { color: #64748b; text-decoration: underline; cursor: pointer; }
+
+        /* -------------------------------------------
+           🌀 [โหมดที่ 2] หน้าโหลดดิ้งออโต้ (Loading Screen)
+        ------------------------------------------- */
+        .card-loading {
+            text-align: center;
+            display: none; /* ซ่อนไว้ก่อน เดี๋ยวใช้ JS สั่งเปิด */
+        }
         .loader { 
-            border: 4px solid #333333; /* สีพื้นขอบโหลด */
-            border-top: 4px solid #3b82f6; /* สีฟ้าสด (Spinner) */
-            border-radius: 50%; 
-            width: 40px; 
-            height: 40px; 
-            animation: spin 1s linear infinite; 
-            margin: 0 auto 20px; 
+            border: 4px solid #222222; 
+            border-top: 4px solid #3b82f6; /* โหลดดิ้งสีฟ้าตามรีเควส */
+            border-radius: 50%; width: 50px; height: 50px; 
+            animation: spin 1s linear infinite; margin: 0 auto 20px; 
         }
-
-        /* [USER_REQUEST] 3. Auto RC PC เป็นหัวข้อขาวนวล */
-        h1 { 
-            color: #f1f5f9; /* สีขาวนวล */
-            margin-bottom: 10px; 
-            font-size: 26px; 
-        }
-
-        /* [USER_REQUEST] 4. ข้อความรายละเอียดเป็นขาวเทา (อ่านง่ายบนพื้นหลังดำ) */
-        p { 
-            color: #cbd5e1; /* สีขาวเทาอ่อน */
-            font-size: 15px; 
-            line-height: 1.6; 
-            margin-bottom: 25px; 
-        }
-
-        /* เครดิตท้ายเทาอ่อนมากๆ */
-        .footer {
-            font-size: 12px; 
-            color: #94a3b8; /* สีเทาอ่อน (เกือบขาวแต่ยังดูเป็นส่วน footer) */
-        }
-
+        .loading-text { color: #cbd5e1; font-size: 16px; line-height: 1.6; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
-    <div class="card">
+    <div id="view-plans" class="card-plans">
+        <h1 id="ui-title">อัปเกรดเป็นเวอร์ชัน Pro</h1>
+        <div class="features-list">
+            <div class="feature-item"><span class="feature-icon">🔓</span><span id="f1">เข้าถึงทุกโมดูลการออกแบบโครงสร้าง</span></div>
+            <div class="feature-item"><span class="feature-icon">📄</span><span id="f2">ส่งออกรายการคำนวณ, รายการตัดเหล็ก, ใบประมาณราคา</span></div>
+            <div class="feature-item"><span class="feature-icon">🏢</span><span id="f3">ส่งออกโมเดลโครงสร้าง และ ไฟล์ CAD</span></div>
+        </div>
+
+        <div class="plan-option selected" onclick="selectPlan('Monthly', 'pri_รายเดือน_ของคุณ')" id="plan-monthly">
+            <div>
+                <div class="plan-title" id="t-monthly">สมาชิกรายเดือน</div>
+                <div class="plan-desc" id="d-monthly">ยกเลิกได้ทุกเมื่อ</div>
+            </div>
+            <div class="plan-price">฿149</div>
+        </div>
+
+        <div class="plan-option" onclick="selectPlan('Yearly', 'pri_รายปี_ของคุณ')" id="plan-yearly">
+            <div>
+                <div class="plan-title"><span id="t-yearly">สมาชิกรายปี</span><span class="save-badge" id="b-yearly">ประหยัด 33%</span></div>
+                <div class="plan-desc" id="d-yearly">คุ้มค่าที่สุด</div>
+            </div>
+            <div class="plan-price">฿1,190</div>
+        </div>
+
+        <button class="btn-trial" id="btn-trial" onclick="checkout()">เริ่มทดลองใช้ฟรี 7 วัน</button>
+        <button class="btn-primary" id="btn-subscribe" onclick="checkout()">สมัครสมาชิก</button>
+
+        <div class="footer-links">
+            <a onclick="alert('ระบบกำลังดำเนินการกู้คืนรายการ...')">กู้คืนรายการ</a>
+            <a href="https://autorc-design.carrd.co/#refund" target="_blank">นโยบายการคืนเงิน</a>
+            <a href="https://autorc-design.carrd.co/#privacy" target="_blank">ความเป็นส่วนตัว</a>
+            <a href="https://autorc-design.carrd.co/#terms" target="_blank">เงื่อนไขการบริการ</a>
+        </div>
+    </div>
+
+    <div id="view-loading" class="card-loading">
         <div class="loader"></div>
-        <h1>Auto RC PC</h1>
-        <p>Connecting to Paddle's secure payment system...<br>If the checkout window does not open automatically, please relaunch it from the Auto RC application.</p>
-        <div class="footer">© 2026 Auto RC. All rights reserved.</div>
+        <div class="loading-text">
+            <b style="color: white; font-size: 20px;">Auto RC PC</b><br><br>
+            <span id="load-msg">กำลังเชื่อมต่อกับระบบชำระเงิน Paddle ปลอดภัย...</span>
+        </div>
     </div>
 
     <script>
-        // 1. ดักรับค่าจากแอป Kotlin (ใช้ Price ID เทสเพื่อการรีวิว)
+        // ดึงพารามิเตอร์จาก URL หางว่าวที่ส่งมาจากแอป Kotlin
         const urlParams = new URLSearchParams(window.location.search);
         let priceId = urlParams.get('price_id');
         const userId = urlParams.get('user_id') || 'review_user';
         const deviceId = urlParams.get('device_id') || 'review_device';
+        const lang = urlParams.get('lang') || 'thai';
 
-        // 🛠️ Reviewer Fallback: ถ้าคนตรวจ Paddle พิมพ์เข้าลิงก์มาดื้อๆ
-        // ให้ยัดรหัสราคาเทส/จริงของคุณลงไปตรงนี้เลย เพื่อให้หน้าต่างจ่ายเงินเด้งโชว์คนตรวจทันที
-        if (!priceId) {
-            priceId = 'pri_01ksm1vzz6zg2hayb8zmenvnb4'; // <--- เอารหัสราคา (Price ID) ของคุณมาใส่ตรงนี้
-        }
-
-        // 🌟 ใส่ Client Token บัญชีของคุณตรงนี้
+        // 🌟 ตั้งค่า Client Token (ใช้รหัสเทสล่าสุดของคุณ)
         Paddle.Setup({ token: 'test_4c6336ab0eb5b58c83150a6fe29' });
 
-        // สั่งเปิดหน้าต่างชำระเงินออโต้
-        Paddle.Checkout.open({
-            settings: { displayMode: "overlay" },
-            items: [{ priceId: priceId, quantity: 1 }],
-            customData: { user_id: userId, device_id: deviceId }
-        });
+        let currentPriceId = priceId; // ยึดตามแอปส่งมาก่อน
+
+        // 🔀 สวิตช์สลับหน้าจออัจฉริยะ (UI Switcher Logic)
+        if (priceId) {
+            // โหมดที่ 2: มีข้อมูลส่งมาจากแอป ➔ เปิดหน้าโหลดดิ้งแล้วเด้งหน้าต่างจ่ายเงินออโต้ทันที
+            document.getElementById('view-loading').style.display = 'block';
+            
+            if(lang !== 'thai') {
+                document.getElementById('load-msg').innerText = "Connecting to Paddle's secure payment system...";
+            }
+
+            // หน่วงเวลา 0.5 วินาทีให้แอนิเมชันสวยงาม ก่อนเด้งหน้าต่างกรอกบัตร
+            setTimeout(() => {
+                checkout();
+            }, 500);
+
+        } else {
+            // โหมดที่ 1: ไม่มีข้อมูลส่งมา (คนตรวจหรือกดเล่น) ➔ เปิดหน้าเลือกแผนให้กดยืนยันเอง
+            document.getElementById('view-plans').style.display = 'block';
+            
+            // เซ็ตราคาตัวเลือกตั้งต้นเป็นรายเดือน (ใส่ไอดีรายเดือนจริงของคุณแทนที่คำนี้)
+            currentPriceId = 'pri_รายเดือน_ของคุณ'; 
+        }
+
+        // ฟังก์ชันเมื่อเปลี่ยนการเลือกในการ์ดตู้ขาย
+        function selectPlan(plan, pId) {
+            currentPriceId = pId;
+            document.getElementById('plan-monthly').classList.remove('selected');
+            document.getElementById('plan-yearly').classList.remove('selected');
+            if(plan === 'Monthly') {
+                document.getElementById('plan-monthly').classList.add('selected');
+            } else {
+                document.getElementById('plan-yearly').classList.add('selected');
+            }
+        }
+
+        // ฟังก์ชันสั่งเรียกหน้าต่าง Checkout ของ Paddle
+        function checkout() {
+            Paddle.Checkout.open({
+                settings: { displayMode: "overlay" },
+                items: [{ priceId: currentPriceId, quantity: 1 }],
+                customData: { user_id: userId, device_id: deviceId }
+            });
+        }
+
+        // 🌍 แผงแปลภาษาฝั่งหน้าตู้เลือกแผน
+        if (lang !== 'thai') {
+            document.getElementById('ui-title').innerText = 'Upgrade to Pro';
+            document.getElementById('f1').innerText = 'Full access to all Structural Modules';
+            document.getElementById('f2').innerText = 'Export Calculation, Bar Cut List, BOQ Report';
+            document.getElementById('f3').innerText = 'Export Structural Model and CAD Drawing';
+            document.getElementById('t-monthly').innerText = 'Monthly Plan';
+            document.getElementById('d-monthly').innerText = 'Cancel anytime';
+            document.getElementById('t-yearly').innerText = 'Yearly Plan';
+            document.getElementById('b-yearly').innerText = 'Save 33%';
+            document.getElementById('d-yearly').innerText = 'Best Value';
+            document.getElementById('btn-trial').innerText = 'Start 7-Day Free Trial';
+            document.getElementById('btn-subscribe').innerText = 'Subscribe Now';
+        }
     </script>
 </body>
 </html>
