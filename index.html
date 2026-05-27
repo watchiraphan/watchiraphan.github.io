@@ -119,7 +119,7 @@
                 <div class="plan-title" id="t-monthly">Monthly Plan</div>
                 <div class="plan-desc" id="d-monthly">Cancel anytime</div>
             </div>
-            <div class="plan-price">Loading...</div>
+            <div class="plan-price">15.99 $</div>
         </div>
 
         <div class="plan-option" id="plan-yearly">
@@ -127,7 +127,7 @@
                 <div class="plan-title"><span id="t-yearly">Yearly Plan</span><span class="save-badge" id="b-yearly">Save 33%</span></div>
                 <div class="plan-desc" id="d-yearly">Best Value</div>
             </div>
-            <div class="plan-price">Loading...</div>
+            <div class="plan-price">129.99 $</div>
         </div>
 
         <button class="btn-trial" id="btn-trial">Start 7-Day Free Trial</button>
@@ -183,16 +183,26 @@
             }
         });
 
-        // 4. 🔥 [ฟังก์ชันใหม่] ยิงดึงค่าราคา Preview สดจากเซิร์ฟเวอร์ Paddle มาแสดงผลบนหน้าจอ
+        // 4. 🔥 [ปรับปรุงใหม่] ฟังก์ชันดึงราคาที่จะไม่ค้าง Loading... ถ้าหาไม่เจอจะสลับคงราคาเดิมทันที
         function fetchPaddlePrices() {
+            // ดักความปลอดภัยขั้นแรก: ใส่ราคา Default เตรียมพร้อมไว้ในระบบก่อนเลย
+            const defaultMonthly = "15.99 $";
+            const defaultYearly = "129.99 $";
+
             Paddle.PricePreview({
                 items: [
                     { priceId: 'pri_01ksm1vzz6zg2hayb8zmenvnb4', quantity: 1 }, // ไอดีรายเดือน
                     { priceId: 'pri_01ksm1s4zxbadbeaxhbp3rg3fz', quantity: 1 }  // ไอดีรายปี
                 ]
             }).then((result) => {
+                // เช็กเผื่อกรณี Paddle ส่งค่ากลับมาสำเร็จแต่ไม่มีข้อมูลสินค้าข้างใน (Empty array)
+                if (!result || !result.data || !result.data.details || !result.data.details.lineItems || result.data.details.lineItems.length === 0) {
+                    document.querySelector('#plan-monthly .plan-price').innerText = defaultMonthly;
+                    document.querySelector('#plan-yearly .plan-price').innerText = defaultYearly;
+                    return;
+                }
+
                 result.data.details.lineItems.forEach((item) => {
-                    // ดึงราคาสุทธิตามพื้นที่พร้อมเครื่องหมายสกุลเงิน (เช่น 15.99 $ หรือ ฿540.00)
                     const formattedPrice = item.totals.totalFormated; 
                     
                     if (item.priceId === 'pri_01ksm1vzz6zg2hayb8zmenvnb4') {
@@ -203,13 +213,13 @@
                 });
             }).catch((error) => {
                 console.error("Paddle PricePreview Error: ", error);
-                // กรณีดึงราคาไม่สำเร็จ ให้ใส่ราคา Default ป้องกันหน้าจอค้างคำว่า Loading...
-                document.querySelector('#plan-monthly .plan-price').innerText = "15.99 $";
-                document.querySelector('#plan-yearly .plan-price').innerText = "129.99 $";
+                // หากเน็ตหลุด คีย์พัง หรือเอ๋อ ให้บังคับใช้ราคา Default ทันที
+                document.querySelector('#plan-monthly .plan-price').innerText = defaultMonthly;
+                document.querySelector('#plan-yearly .plan-price').innerText = defaultYearly;
             });
         }
 
-        // สั่งให้ระบบดึงราคาทำงานทันทีหลังเซ็ตอัปเสร็จสิ้น
+        // เรียกใช้งานฟังก์ชันดึงราคา
         fetchPaddlePrices();
 
         // 5. ลอจิกเปิดบิลอัตโนมัติหากส่งค่ามาจากในแอป
