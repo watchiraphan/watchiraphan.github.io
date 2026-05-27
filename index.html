@@ -61,7 +61,7 @@
             display: flex; justify-content: space-between; align-items: center;
         }
         /* เส้นขอบตอนเลือกแผนสีฟ้าใส */
-        .plan-option.selected { border-color: #55FFFF; background: rgba(17, 24, 39, 0.8); }
+        .plan-option.selected { border-color: #55FFFF; background: rgba(17, 24, 39, 0.8); !important; }
         .plan-title { font-weight: bold; font-size: 16px; color: #ffffff; }
         .plan-desc { font-size: 12px; color: #94a3b8; margin-top: 4px; }
         .save-badge { background: #22c55e; color: #ffffff; font-size: 11px; padding: 2px 6px; border-radius: 4px; margin-left: 8px; }
@@ -175,17 +175,22 @@
             setTimeout(() => { checkout(); }, 400);
         }
 
-        // 🌟 [แก้ไขเรียบร้อย] ล้างแคชขยะและตัวอักษรล่องหนออกทั้งหมด ฟังก์ชันกลับมาทำงานสมบูรณ์แล้วครับ
+        // 🌟 ล้างโค้ดใหม่ทั้งหมดแบบพิมพ์สด ไร้อักขระแฝง ย้ายขอบฟ้าแน่นอนชัวร์
         function selectPlan(plan, pId) {
-            currentPriceId = pId; 
+            currentPriceId = pId;
             
-            document.getElementById('plan-monthly').classList.remove('selected');
-            document.getElementById('plan-yearly').classList.remove('selected');
+            var monthlyEl = document.getElementById('plan-monthly');
+            var yearlyEl = document.getElementById('plan-yearly');
             
-            if(plan === 'Monthly') {
-                document.getElementById('plan-monthly').classList.add('selected');
-            } else {
-                document.getElementById('plan-yearly').classList.add('selected');
+            if (monthlyEl && yearlyEl) {
+                monthlyEl.classList.remove('selected');
+                yearlyEl.classList.remove('selected');
+                
+                if (plan === 'Monthly') {
+                    monthlyEl.classList.add('selected');
+                } else {
+                    yearlyEl.classList.add('selected');
+                }
             }
         }
 
