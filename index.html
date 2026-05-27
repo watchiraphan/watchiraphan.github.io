@@ -187,35 +187,76 @@
         function fetchPaddlePrices() {
             const defaultMonthly = "15.99 $";
             const defaultYearly = "129.99 $";
-
+        
+            console.log("🚀 [Diagnostic] Starting Paddle.PricePreview request...");
+        
             Paddle.PricePreview({
                 items: [
-                    { priceId: 'pri_01ksm1vzz6zg2hayb8zmenvnb4', quantity: 1 }, // ไอดีรายเดือน
-                    { priceId: 'pri_01ksm1s4zxbadbeaxhbp3rg3fz', quantity: 1 }  // ไอดีรายปี
+                    { priceId: 'pri_01ksm1vzz6zg2hayb8zmenvnb4', quantity: 1 }, 
+                    { priceId: 'pri_01ksm1s4zxbadbeaxhbp3rg3fz', quantity: 1 }  
                 ],
-                // บังคับจำลอง Address ไปที่ US เพื่อแก้บั๊ก Sandbox มองไม่เห็นราคาของพิกัดในไทย
                 address: {
                     countryCode: 'US'
                 }
             }).then((result) => {
+                // 🔬 วินิจฉัยจุดที่ 1: ตรวจสอบข้อมูลดิบที่ Paddle ตอบกลับมาทั้งหมด
+                console.log("📥 [Diagnostic] Full Raw Result from Paddle:", JSON.stringify(result, null, 2));
+        
                 if (!result || !result.data || !result.data.details || !result.data.details.lineItems || result.data.details.lineItems.length === 0) {
+                    console.error("⚠️ [Diagnostic] Verification Failed: Data structure is incomplete or lineItems is empty.");
+                    
+                    // วินิจฉัยเจาะลึกว่าวัตถุตัวไหนที่ขาดหายไป
+                    console.log("🔍 [Diagnostic] Structural Check:", {
+                        hasResult: !!result,
+                        hasData: result ? !!result.data : false,
+                        hasDetails: (result && result.data) ? !!result.data.details : false,
+                        hasLineItems: (result && result.data && result.data.details) ? !!result.data.details.lineItems : false
+                    });
+        
                     document.querySelector('#plan-monthly .plan-price').innerText = defaultMonthly;
                     document.querySelector('#plan-yearly .plan-price').innerText = defaultYearly;
                     return;
                 }
-
-                result.data.details.lineItems.forEach((item) => {
-                    const formattedPrice = item.totals.totalFormated; 
+        
+                console.log(`📦 [Diagnostic] Found ${result.data.details.lineItems.length} items in response. Mapping prices...`);
+                let matchedCount = 0;
+        
+                result.data.details.lineItems.forEach((item, index) => {
+                    const formattedPrice = item.totals ? item.totals.totalFormated : null; 
                     
-                    // ใน Paddle v3 โครงสร้างอาเรย์ส่งกลับมา ตัวแปรเช็กไอดีราคาจะย่อเหลือแค่ .id
-                    if (item.id === 'pri_01ksm1vzz6zg2hayb8zmenvnb4') {
-                        document.querySelector('#plan-monthly .plan-price').innerText = formattedPrice;
-                    } else if (item.id === 'pri_01ksm1s4zxbadbeaxhbp3rg3fz') {
-                        document.querySelector('#plan-yearly .plan-price').innerText = formattedPrice;
+                    // 🔬 วินิจฉัยจุดที่ 2: ตรวจสอบคุณสมบัติภายในของไอเทมแต่ละตัวในอาเรย์
+                    console.log(`🔹 [Item ${index}] ID Check:`, {
+                        expectedPriceId_Field: item.priceId, // เผื่อโครงสร้าง v3 สลับฟิลด์
+                        actualId_Field: item.id,
+                        readPriceFormat: formattedPrice
+                    });
+                    
+                    if (item.id === 'pri_01ksm1vzz6zg2hayb8zmenvnb4' || item.priceId === 'pri_01ksm1vzz6zg2hayb8zmenvnb4') {
+                        document.querySelector('#plan-monthly .plan-price').innerText = formattedPrice || defaultMonthly;
+                        matchedCount++;
+                    } else if (item.id === 'pri_01ksm1s4zxbadbeaxhbp3rg3fz' || item.priceId === 'pri_01ksm1s4zxbadbeaxhbp3rg3fz') {
+                        document.querySelector('#plan-yearly .plan-price').innerText = formattedPrice || defaultYearly;
+                        matchedCount++;
                     }
                 });
+        
+                if (matchedCount < 2) {
+                    console.warn(`⚠️ [Diagnostic] Warning: Matched only ${matchedCount}/2 prices. Check if Price IDs in Dashboard match exactly.`);
+                } else {
+                    console.log("✅ [Diagnostic] All prices successfully resolved and injected into UI.");
+                }
+        
             }).catch((error) => {
-                console.error("Paddle PricePreview Error: ", error);
+                // 🔬 วินิจฉัยจุดที่ 3: จับความผิดพลาดกรณีเน็ตหลุด คีย์พัง หรือโดนบล็อก CORS
+                console.error("🚨 [Diagnostic] Paddle PricePreview CRITICAL ERROR: ", error);
+                
+                if (error instanceof Error) {
+                    console.error("📋 [Diagnostic] Error Message:", error.message);
+                    console.error("🗂️ [Diagnostic] Error Stack:", error.stack);
+                } else {
+                    console.error("📦 [Diagnostic] Raw Error Object:", JSON.stringify(error, null, 2));
+                }
+        
                 document.querySelector('#plan-monthly .plan-price').innerText = defaultMonthly;
                 document.querySelector('#plan-yearly .plan-price').innerText = defaultYearly;
             });
