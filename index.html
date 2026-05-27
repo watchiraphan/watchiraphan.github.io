@@ -133,10 +133,9 @@
         // 🌟 บัญชี Sandbox Token ของคุณ
         Paddle.Setup({ token: 'test_4c6336ab0eb5b58c83150a6fe29' });
 
-        // ราคา Default ตัวเลือกแรก (รายเดือน) กรณีหาไอดีจากแอปไม่พบ
+        // ราคาค่าเริ่มต้น
         let currentPriceId = 'pri_01ksm1vzz6zg2hayb8zmenvnb4'; 
 
-        // ระบบเลือกหน้าจออัตโนมัติแบบเซฟตี้ 
         if (priceId && priceId.trim() !== '' && priceId.startsWith('pri_')) {
             currentPriceId = priceId;
             document.getElementById('view-plans').style.display = 'none';
@@ -147,9 +146,6 @@
             }
             
             setTimeout(() => { checkout(); }, 400);
-        } else {
-            // หน้าตู้ขายของเปิดสแตนด์บายรอไว้แล้วเงียบๆ สั่ง Paddle โหลดรอด้านหลังได้เลย
-            console.log("โหมดหน้าตู้ขายของสแตนด์บายทำงานราบรื่น");
         }
 
         function selectPlan(plan, pId) {
@@ -175,7 +171,7 @@
             }
         }
 
-        // 🌍 แผงคำแปลภาษาภาษาอังกฤษ
+        // 🌍 แผงคำแปลภาษาอังกฤษ
         if (lang !== 'thai') {
             document.getElementById('ui-title').innerText = 'Upgrade to Pro';
             document.getElementById('f1').innerText = 'Full access to all Structural Modules';
