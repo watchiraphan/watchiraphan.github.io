@@ -172,7 +172,7 @@
             document.getElementById('lnk-terms').innerText = 'เงื่อนไขการบริการ';
         }
 
-        // ดักจับกรณีออบเจกต์ Paddle ไม่ถูกโหลด ป้องกันหน้าเว็บค้างไร้การตอบสนอง
+        // เริ่มต้นการใช้งานเอนจิ้น Paddle
         if (typeof Paddle !== 'undefined') {
             Paddle.Setup({ 
                 token: 'test_4c6336ab0eb5b58c83150a6fe29',
@@ -180,47 +180,9 @@
                     locale: lang === 'thai' ? 'th' : 'en'
                 }
             });
-        } else {
-            console.error("🚨 [Critical Error] Paddle SDK cannot be initialized due to network blocking.");
         }
 
-        function fetchPaddlePrices() {
-            const defaultMonthly = "15.99 $";
-            const defaultYearly = "129.99 $";
-        
-            if (typeof Paddle === 'undefined') {
-                return;
-            }
-
-            Paddle.PricePreview({
-                items: [
-                    { priceId: 'pri_01ksm1vzz6zg2hayb8zmenvnb4', quantity: 1 }, 
-                    { priceId: 'pri_01ksm1s4zxbadbeaxhbp3rg3fz', quantity: 1 }  
-                ],
-                address: {
-                    countryCode: 'US'
-                }
-            }).then((result) => {
-                if (!result || !result.data || !result.data.details || !result.data.details.lineItems || result.data.details.lineItems.length === 0) {
-                    return;
-                }
-        
-                result.data.details.lineItems.forEach((item) => {
-                    const formattedPrice = item.totals ? item.totals.totalFormated : null; 
-                    
-                    if (item.id === 'pri_01ksm1vzz6zg2hayb8zmenvnb4' || item.priceId === 'pri_01ksm1vzz6zg2hayb8zmenvnb4') {
-                        document.querySelector('#plan-monthly .plan-price').innerText = formattedPrice || defaultMonthly;
-                    } else if (item.id === 'pri_01ksm1s4zxbadbeaxhbp3rg3fz' || item.priceId === 'pri_01ksm1s4zxbadbeaxhbp3rg3fz') {
-                        document.querySelector('#plan-yearly .plan-price').innerText = formattedPrice || defaultYearly;
-                    }
-                });
-            }).catch((error) => {
-                console.error("Paddle PricePreview Catch Error: ", error);
-            });
-        }
-
-        fetchPaddlePrices();
-
+        // ลอจิกเปิดบิลอัตโนมัติ (หากยิงค่าเปิดตรงมาจากในแอปพลิเคชัน)
         if (priceId && priceId.trim() !== '' && priceId.startsWith('pri_')) {
             document.getElementById('view-plans').style.display = 'none';
             document.getElementById('view-loading').style.display = 'block';
@@ -230,16 +192,18 @@
             setTimeout(() => { openPaddle(priceId); }, 400);
         }
 
+        // จัดการเหตุการณ์เมื่อคลิกเลือกแพ็กเกจรายเดือน / รายปี แบบแมนนวล
         document.querySelectorAll('.plan-option').forEach(function(el) {
             el.addEventListener('click', function() {
-                let selectedId = 'pri_01ksm1vzz6zg2hayb8zmenvnb4';
+                let selectedId = 'pri_01ksm1vzz6zg2hayb8zmenvnb4'; // ไอดีรายเดือน
                 if (this.id === 'plan-yearly') {
-                    selectedId = 'pri_01ksm1s4zxbadbeaxhbp3rg3fz';
+                    selectedId = 'pri_01ksm1s4zxbadbeaxhbp3rg3fz'; // ไอดีรายปี
                 }
                 openPaddle(selectedId);
             });
         });
 
+        // ปุ่มเริ่มทดลองใช้งานฟรี 7 วัน (ผูกกับแพ็กเกจรายปีที่มี Trial)
         const trialBtn = document.getElementById('btn-trial');
         if (trialBtn) {
             trialBtn.addEventListener('click', function() {
@@ -247,9 +211,10 @@
             });
         }
 
+        // ฟังก์ชันหลักในการเปิดหน้าต่างป๊อปอัปชำระเงิน (Paddle Checkout)
         function openPaddle(targetPriceId) {
             if (typeof Paddle === 'undefined') {
-                alert(lang === 'thai' ? "ไม่สามารถเชื่อมต่อกับระบบ Paddle ได้ในขณะนี้ กรุณาตรวจสอบตัวบล็อกโฆษณา (AdBlocker) หรือ VPN ของคุณ" : "Cannot connect to Paddle. Please check your AdBlocker or VPN settings.");
+                alert(lang === 'thai' ? "ไม่สามารถเรียกใช้งานระบบชำระเงินได้ กรุณาปิดตัวบล็อกโฆษณา (AdBlocker) แล้วลองใหม่อีกครั้ง" : "Checkout error. Please disable AdBlocker and try again.");
                 return;
             }
             try {
@@ -262,7 +227,7 @@
                     customData: { user_id: userId, device_id: deviceId }
                 });
             } catch (e) {
-                alert(lang === 'thai' ? "ระบบขัดข้องชั่วคราว! กรุณาลองใหม่อีกครั้ง" : "Temporary error! Please try again.");
+                alert(lang === 'thai' ? "เกิดข้อผิดพลาดในการเปิดระบบชำระเงิน กรุณาลองใหม่อีกครั้ง" : "Error opening checkout. Please try again.");
             }
         }
     </script>
