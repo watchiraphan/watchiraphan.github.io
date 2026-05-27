@@ -22,7 +22,6 @@
             min-height: 100vh; 
         }
 
-        /* 📦 หน้าสไตล์ตู้ขายของ */
         .card-plans { 
             background: rgba(17, 17, 17, 0.6); 
             backdrop-filter: blur(10px);
@@ -43,30 +42,34 @@
         .feature-item { display: flex; align-items: center; margin-bottom: 12px; font-size: 14px; color: #CAF8F4; }
         .feature-icon { color: #55FFFF; margin-right: 12px; font-size: 20px; flex-shrink: 0; }
 
-        /* 🚨 [จุดแก้ไขที่ 1] เติม pointer-events: none ให้ของข้างในกล่อง เพื่อบังคับให้ระบบกดโดนตัวกล่องเสมอ */
+        /* ปรับแต่งปุ่มราคาให้ดูน่ากดมากขึ้น และตัด pointer-events ด้านในออกเพื่อให้กดติดง่าย */
         .plan-option {
-            background: rgba(26, 26, 26, 0.7); border: 2px solid #333333; border-radius: 12px; padding: 16px;
-            margin-bottom: 12px; text-align: left; cursor: pointer; transition: all 0.2s;
-            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(26, 26, 26, 0.7); 
+            border: 2px solid #333333; 
+            border-radius: 12px; 
+            padding: 18px;
+            margin-bottom: 14px; 
+            text-align: left; 
+            cursor: pointer; 
+            transition: all 0.2s ease;
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
         }
-        .plan-option * { pointer-events: none; } /* บังคับให้กดทะลุลงกล่องแม่ */
-        
-        /* 🚨 [จุดแก้ไขที่ 2] บังคับให้ขอบฟ้าทำงานแน่นอนด้วย !important */
-        .plan-option.selected { 
-            border-color: #55FFFF !important; 
-            background: rgba(17, 24, 39, 0.8) !important; 
+        /* เอฟเฟกต์ตอนเอาเมาส์ไปชี้หรือกดปุ่มราคา */
+        .plan-option:hover {
+            border-color: #55FFFF;
+            background: rgba(17, 24, 39, 0.8);
+            transform: translateY(-1px);
         }
+        .plan-option * { pointer-events: none; } 
         
         .plan-title { font-weight: bold; font-size: 16px; color: #ffffff; }
         .plan-desc { font-size: 12px; color: #94a3b8; margin-top: 4px; }
         .save-badge { background: #22c55e; color: #ffffff; font-size: 11px; padding: 2px 6px; border-radius: 4px; margin-left: 8px; }
-        .plan-price { font-size: 18px; font-weight: bold; color: #55FFFF; }
+        .plan-price { font-size: 20px; font-weight: bold; color: #55FFFF; }
 
-        .btn-primary { background: #55FFFF; color: #000000; border: none; border-radius: 12px; width: 100%; padding: 14px; font-size: 16px; font-weight: 800; cursor: pointer; margin-top: 15px; }
-        .btn-primary:hover { background: #33e6e6; }
-        .btn-trial { background: transparent; color: #55FFFF; border: 1px solid #55FFFF; border-radius: 12px; width: 100%; padding: 12px; font-size: 14px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        .btn-trial:hover { background: rgba(85, 255, 255, 0.1); }
-        .footer-links { display: flex; justify-content: space-evenly; margin-top: 25px; font-size: 11px; }
+        .footer-links { display: flex; justify-content: space-evenly; margin-top: 30px; font-size: 11px; }
         .footer-links a { color: #64748b; text-decoration: underline; cursor: pointer; }
 
         .card-loading {
@@ -94,7 +97,7 @@
             <div class="feature-item"><span class="feature-icon">🏢</span><span id="f3">ส่งออกโมเดลโครงสร้าง และ ไฟล์ CAD</span></div>
         </div>
 
-        <div class="plan-option selected" id="plan-monthly">
+        <div class="plan-option" id="plan-monthly">
             <div>
                 <div class="plan-title" id="t-monthly">สมาชิกรายเดือน</div>
                 <div class="plan-desc" id="d-monthly">ยกเลิกได้ทุกเมื่อ</div>
@@ -109,9 +112,6 @@
             </div>
             <div class="plan-price">$129.99</div>
         </div>
-
-        <button class="btn-trial" id="btn-trial" onclick="checkout()">เริ่มทดลองใช้ฟรี 7 วัน</button>
-        <button class="btn-primary" id="btn-subscribe" onclick="checkout()">สมัครสมาชิก</button>
 
         <div class="footer-links">
             <a onclick="alert('ระบบกำลังดำเนินการกู้คืนรายการ...')">กู้คืนรายการ</a>
@@ -138,45 +138,35 @@
 
         Paddle.Setup({ token: 'test_4c6336ab0eb5b58c83150a6fe29' });
 
-        let currentPriceId = 'pri_01ksm1vzz6zg2hayb8zmenvnb4'; 
-
         if (priceId && priceId.trim() !== '' && priceId.startsWith('pri_')) {
-            currentPriceId = priceId;
             document.getElementById('view-plans').style.display = 'none';
             document.getElementById('view-loading').style.display = 'block';
             if(lang !== 'thai') { document.getElementById('load-msg').innerText = "Connecting to Paddle's secure payment system..."; }
-            setTimeout(() => { checkout(); }, 400);
+            setTimeout(() => { openPaddle(priceId); }, 400);
         }
 
-        // 🚨 [จุดแก้ไขที่ 3] ใช้การดักคลิกแบบจับคู่ Class โดยตรง แก้ไขปัญหากดไม่ติดเด็ดขาด
+        // 🚀 ดักจับการคลิกที่กล่องราคาโดยตรง จิ้มอันไหน ส่งค่านั้นไปเปิด Paddle ทันที!
         document.querySelectorAll('.plan-option').forEach(function(el) {
-            el.addEventListener('click', function(e) {
-                // เอา class selected ออกจากทุกกล่อง
-                document.querySelectorAll('.plan-option').forEach(function(opt) {
-                    opt.classList.remove('selected');
-                });
+            el.addEventListener('click', function() {
+                let selectedId = 'pri_01ksm1vzz6zg2hayb8zmenvnb4'; // ค่าเริ่มต้นรายเดือน
                 
-                // ใส่ class selected ให้กล่องที่โดนกด
-                this.classList.add('selected');
-                
-                // สลับไอดีราคาชำระเงินตามจริง
-                if (this.id === 'plan-monthly') {
-                    currentPriceId = 'pri_01ksm1vzz6zg2hayb8zmenvnb4';
-                } else {
-                    currentPriceId = 'pri_01ksm1s4zxbadbeaxhbp3rg3fz';
+                if (this.id === 'plan-yearly') {
+                    selectedId = 'pri_01ksm1s4zxbadbeaxhbp3rg3fz'; // ถ้ารายปีสลับไอดีมานี่
                 }
+                
+                openPaddle(selectedId);
             });
         });
 
-        function checkout() {
+        function openPaddle(targetPriceId) {
             try {
                 Paddle.Checkout.open({
                     settings: { displayMode: "overlay" },
-                    items: [{ priceId: currentPriceId, quantity: 1 }],
+                    items: [{ priceId: targetPriceId, quantity: 1 }],
                     customData: { user_id: userId, device_id: deviceId }
                 });
             } catch (e) {
-                alert("ระบบขัดข้องชั่วคราว! โปรดเลือกแผนการใช้งานใหม่อีกครั้งบนหน้าจอ");
+                alert("ระบบขัดข้องชั่วคราว! กรุณาลองใหม่อีกครั้ง");
             }
         }
 
@@ -190,8 +180,6 @@
             document.getElementById('t-yearly').innerText = 'Yearly Plan';
             document.getElementById('b-yearly').innerText = 'Save 33%';
             document.getElementById('d-yearly').innerText = 'Best Value';
-            document.getElementById('btn-trial').innerText = 'Start 7-Day Free Trial';
-            document.getElementById('btn-subscribe').innerText = 'Subscribe Now';
         }
     </script>
 </body>
