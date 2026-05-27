@@ -18,9 +18,7 @@
             min-height: 100vh; 
         }
 
-        /* -------------------------------------------
-           📦 [โหมดที่ 1] หน้าสไตล์ตู้ขายของ (Plan Selection)
-        ------------------------------------------- */
+        /* 📦 [ตั้งค่าเริ่มต้น] ให้แสดงหน้าตู้ขายของทันทีตั้งแต่โหลดเสร็จ ป้องกันจอดำ */
         .card-plans { 
             background: #111111; 
             padding: 30px; 
@@ -30,7 +28,7 @@
             max-width: 450px; 
             width: 90%; 
             text-align: center;
-            display: none; /* คุมเปิด-ปิดด้วย JavaScript ด้านล่าง */
+            display: block; /* 🌟 โชว์ทันทีเป็น Default */
         }
 
         h1 { color: #3b82f6; margin-bottom: 20px; font-size: 24px; font-weight: bold; }
@@ -55,12 +53,10 @@
         .footer-links { display: flex; justify-content: space-evenly; margin-top: 25px; font-size: 11px; }
         .footer-links a { color: #64748b; text-decoration: underline; cursor: pointer; }
 
-        /* -------------------------------------------
-           🌀 [โหมดที่ 2] หน้าโหลดดิ้งออโต้ (Loading Screen)
-        ------------------------------------------- */
+        /* 🌀 หน้าโหลดดิ้งออโต้ */
         .card-loading {
             text-align: center;
-            display: none; /* คุมเปิด-ปิดด้วย JavaScript ด้านล่าง */
+            display: none; /* ซ่อนไว้ก่อน ค่อยสั่งเปิดด้วย JS เมื่อเจอข้อมูลจากแอป */
         }
         .loader { 
             border: 4px solid #222222; 
@@ -113,27 +109,24 @@
         <div class="loader"></div>
         <div class="loading-text">
             <b style="color: white; font-size: 20px;">Auto RC PC</b><br><br>
-            <span id="load-msg">กำลังเชื่อมต่อกับระบบชำระเงิน Paddle ปลอดภัย...</span>
+            <span id="load-msg">กำลังเชื่อมต่อกับระบบชำระเงิน Paddle ปลอดไข...</span>
         </div>
     </div>
 
     <script>
-        // ดึงข้อมูลจาก URL
+        // 1. ดักรับค่าจาก URL
         const urlParams = new URLSearchParams(window.location.search);
         let priceId = urlParams.get('price_id');
         const userId = urlParams.get('user_id') || 'review_user';
         const deviceId = urlParams.get('device_id') || 'review_device';
         const lang = urlParams.get('lang') || 'thai';
 
-        // 🌟 ตั้งค่า Client Token บัญชี Sandbox
-        Paddle.Setup({ token: 'test_4c6336ab0eb5b58c83150a6fe29' });
+        // 🌟 ตั้งราคาค่าเริ่มต้น (Default Price) ป้องกันกรณีหาราคาจากแอปไม่เจอ
+        let currentPriceId = 'pri_01ksm1vzz6zg2hayb8zmenvnb4'; 
 
-        // กำหนดตัวแปรสำหรับเก็บไอดีราคาที่จะจ่าย
-        let currentPriceId = '';
-
-        // 🔀 ล้างระบบสลับหน้าใหม่ให้ชัวร์ ไม่ค้างดำ
-        if (priceId && priceId.trim() !== '') {
-            // โหมดที่ 2: มาจากแอป -> โชว์หน้าโหลดดิ่งและเรียกหน้าต่างจ่ายเงินทันที
+        // 🔄 จัดการตรวจสอบเงื่อนไขแบบปลอดภัยสูงสุด
+        if (priceId && priceId.trim() !== '' && priceId.startsWith('pri_')) {
+            // กรณีเจอราคาถูกต้องจากแอป -> สับหน้าจอไปโชว์หน้าโหลดดิ้งแทนหน้าเลือกแผน
             currentPriceId = priceId;
             document.getElementById('view-plans').style.display = 'none';
             document.getElementById('view-loading').style.display = 'block';
@@ -141,19 +134,28 @@
             if(lang !== 'thai') {
                 document.getElementById('load-msg').innerText = "Connecting to Paddle's secure payment system...";
             }
-
-            setTimeout(() => {
-                checkout();
-            }, 500);
-
+            
+            // สั่งเปิดหน้าต่างชำระเงินออโต้หลังจากโหลดเสร็จแป๊บนึง
+            setTimeout(() => { initializePaddleAndCheckout(); }, 400);
         } else {
-            // โหมดที่ 1: เปิดเว็บดูเปล่าๆ หรือคนตรวจเข้า -> โชว์หน้าเลือกแพลนตู้ขายของทันที
-            currentPriceId = 'pri_01ksm1vzz6zg2hayb8zmenvnb4'; // แก้ไขเป็นไอดีรายเดือนจริงเรียบร้อยแล้ว
-            document.getElementById('view-loading').style.display = 'none';
-            document.getElementById('view-plans').style.display = 'block';
+            // กรณีไม่มีข้อมูล หรือ ข้อมูลราคาเพี้ยน -> เว็บจะค้างอยู่ที่หน้าตู้ขายของ (view-plans) เสมอตามค่าที่เราเซ็ตไว้ใน CSS
+            console.log("โหมดหน้าตู้ขายของทำงาน: ใช้ราคา Default รายเดือน");
+            initializePaddleAndCheckout(false); // เรียกโหลดสคริปต์ Paddle รอไว้ด้านหลังแบบเงียบๆ
         }
 
-        // ฟังก์ชันเปลี่ยนสีเมื่อกดเลือกแผนในการ์ด
+        // ฟังก์ชันโหลดระบบความปลอดภัยของ Paddle และสั่งทำงาน
+        function initializePaddleAndCheckout(autoOpen = true) {
+            try {
+                Paddle.Setup({ token: 'test_4c6336ab0eb5b58c83150a6fe29' });
+                if (autoOpen) {
+                    checkout();
+                }
+            } catch (error) {
+                console.error("Paddle SDK เกิดข้อผิดพลาด แต่หน้าเว็บจะไม่พังค้างดำแน่นอน:", error);
+            }
+        }
+
+        // ฟังก์ชันสลับการเลือกการ์ดแผนราคา
         function selectPlan(plan, pId) {
             currentPriceId = pId;
             document.getElementById('plan-monthly').classList.remove('selected');
@@ -165,20 +167,20 @@
             }
         }
 
-        // ฟังก์ชันเรียกทำงานหน้าต่างป๊อปอัพกรอกบัตรของ Paddle
+        // ฟังก์ชันเปิดหน้าต่างจ่ายเงินของ Paddle
         function checkout() {
-            if (!currentPriceId || currentPriceId.startsWith('pri_รายเดือน')) {
-                alert('เกิดข้อผิดพลาด: ไอดีสินค้าไม่ถูกต้อง');
-                return;
+            try {
+                Paddle.Checkout.open({
+                    settings: { displayMode: "overlay" },
+                    items: [{ priceId: currentPriceId, quantity: 1 }],
+                    customData: { user_id: userId, device_id: deviceId }
+                });
+            } catch (e) {
+                alert("ระบบ Checkout ขัดข้องชั่วคราว โปรดเลือกแผนการใช้งานใหม่อีกครั้งบนหน้าเว็บ");
             }
-            Paddle.Checkout.open({
-                settings: { displayMode: "overlay" },
-                items: [{ priceId: currentPriceId, quantity: 1 }],
-                customData: { user_id: userId, device_id: deviceId }
-            });
         }
 
-        // 🌍 แผงสลับคำแปลภาษา
+        // 🌍 ระบบสลับภาษาอัตโนมัติ
         if (lang !== 'thai') {
             document.getElementById('ui-title').innerText = 'Upgrade to Pro';
             document.getElementById('f1').innerText = 'Full access to all Structural Modules';
