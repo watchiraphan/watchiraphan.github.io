@@ -95,7 +95,7 @@
             max-width: 450px; width: 90%; text-align: center; display: none; margin-left: 50px; 
         }
         .loader { border: 4px solid #222222; border-top: 4px solid #55FFFF; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 0 auto 20px; }
-        .loading-text { color: #cbd5e1; font-size: 16px; line-height: 1.6; }
+        .loader-text { color: #cbd5e1; font-size: 16px; line-height: 1.6; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         @media (max-width: 600px) {
@@ -119,7 +119,7 @@
                 <div class="plan-title" id="t-monthly">Monthly Plan</div>
                 <div class="plan-desc" id="d-monthly">Cancel anytime</div>
             </div>
-            <div class="plan-price">15.9 $</div>
+            <div class="plan-price">15.99 $</div>
         </div>
 
         <div class="plan-option" id="plan-yearly">
@@ -127,7 +127,7 @@
                 <div class="plan-title"><span id="t-yearly">Yearly Plan</span><span class="save-badge" id="b-yearly">Save 33%</span></div>
                 <div class="plan-desc" id="d-yearly">Best Value</div>
             </div>
-            <div class="plan-price">129.9 $</div>
+            <div class="plan-price">129.99 $</div>
         </div>
 
         <button class="btn-trial" id="btn-trial">Start 7-Day Free Trial</button>
@@ -149,7 +149,7 @@
     </div>
 
     <script>
-        // 1. แกะพารามิเตอร์ URL ป้องกันค่า null พังพินาศกลางคัน
+        // 1. แกะพารามิเตอร์ URL ป้องกันค่า null
         const urlParams = new URLSearchParams(window.location.search);
         let priceId = urlParams.get('price_id') || '';
         const userId = urlParams.get('user_id') || 'review_user';
@@ -183,9 +183,8 @@
             }
         });
 
-        // 4. 🔥 [ปรับปรุงใหม่] ฟังก์ชันดึงราคาที่จะไม่ค้าง Loading... ถ้าหาไม่เจอจะสลับคงราคาเดิมทันที
+        // 4. 🔥 [ปรับปรุงแก้ไขสมบูรณ์] ฟังก์ชันดึงราคาจำลองแบบล็อคพื้นที่ให้อ่านเจอ 100%
         function fetchPaddlePrices() {
-            // ดักความปลอดภัยขั้นแรก: ใส่ราคา Default เตรียมพร้อมไว้ในระบบก่อนเลย
             const defaultMonthly = "15.99 $";
             const defaultYearly = "129.99 $";
 
@@ -193,9 +192,12 @@
                 items: [
                     { priceId: 'pri_01ksm1vzz6zg2hayb8zmenvnb4', quantity: 1 }, // ไอดีรายเดือน
                     { priceId: 'pri_01ksm1s4zxbadbeaxhbp3rg3fz', quantity: 1 }  // ไอดีรายปี
-                ]
+                ],
+                // บังคับจำลอง Address ไปที่ US เพื่อแก้บั๊ก Sandbox มองไม่เห็นราคาของพิกัดในไทย
+                address: {
+                    countryCode: 'US'
+                }
             }).then((result) => {
-                // เช็กเผื่อกรณี Paddle ส่งค่ากลับมาสำเร็จแต่ไม่มีข้อมูลสินค้าข้างใน (Empty array)
                 if (!result || !result.data || !result.data.details || !result.data.details.lineItems || result.data.details.lineItems.length === 0) {
                     document.querySelector('#plan-monthly .plan-price').innerText = defaultMonthly;
                     document.querySelector('#plan-yearly .plan-price').innerText = defaultYearly;
@@ -205,15 +207,15 @@
                 result.data.details.lineItems.forEach((item) => {
                     const formattedPrice = item.totals.totalFormated; 
                     
-                    if (item.priceId === 'pri_01ksm1vzz6zg2hayb8zmenvnb4') {
+                    // ใน Paddle v3 โครงสร้างอาเรย์ส่งกลับมา ตัวแปรเช็กไอดีราคาจะย่อเหลือแค่ .id
+                    if (item.id === 'pri_01ksm1vzz6zg2hayb8zmenvnb4') {
                         document.querySelector('#plan-monthly .plan-price').innerText = formattedPrice;
-                    } else if (item.priceId === 'pri_01ksm1s4zxbadbeaxhbp3rg3fz') {
+                    } else if (item.id === 'pri_01ksm1s4zxbadbeaxhbp3rg3fz') {
                         document.querySelector('#plan-yearly .plan-price').innerText = formattedPrice;
                     }
                 });
             }).catch((error) => {
                 console.error("Paddle PricePreview Error: ", error);
-                // หากเน็ตหลุด คีย์พัง หรือเอ๋อ ให้บังคับใช้ราคา Default ทันที
                 document.querySelector('#plan-monthly .plan-price').innerText = defaultMonthly;
                 document.querySelector('#plan-yearly .plan-price').innerText = defaultYearly;
             });
