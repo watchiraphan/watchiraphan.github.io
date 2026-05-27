@@ -149,53 +149,14 @@
     </div>
 
     <script>
+        // 1. ดึงข้อมูลพารามิเตอร์จาก URL พร้อมใส่ค่า Fallback กัน Error ล้มเหลวกลางคัน
         const urlParams = new URLSearchParams(window.location.search);
         let priceId = urlParams.get('price_id') || '';
         const userId = urlParams.get('user_id') || 'review_user';
         const deviceId = urlParams.get('device_id') || 'review_device';
         const lang = urlParams.get('lang') || 'en'; 
 
-        Paddle.Setup({ token: 'test_4c6336ab0eb5b58c83150a6fe29' });
-
-        if (priceId && priceId.trim() !== '' && priceId.startsWith('pri_')) {
-            document.getElementById('view-plans').style.display = 'none';
-            document.getElementById('view-loading').style.display = 'block';
-            if(lang === 'thai') { document.getElementById('load-msg').innerText = "กำลังเชื่อมต่อกับระบบชำระเงิน Paddle ปลอดภัย..."; }
-            setTimeout(() => { openPaddle(priceId); }, 400);
-        }
-
-        // กดกล่องราคาเปิด Paddle ทันที
-        document.querySelectorAll('.plan-option').forEach(function(el) {
-            el.addEventListener('click', function() {
-                let selectedId = 'pri_01ksm1vzz6zg2hayb8zmenvnb4'; // รายเดือน
-                if (this.id === 'plan-yearly') {
-                    selectedId = 'pri_01ksm1s4zxbadbeaxhbp3rg3fz'; // รายปี
-                }
-                openPaddle(selectedId);
-            });
-        });
-
-        // 🚀 ดักสัญญาณปุ่มทดลองใช้ฟรี (เปิดราคาตัวคุ้มที่สุด/รายปี เพื่อเริ่ม Trial)
-        const trialBtn = document.getElementById('btn-trial');
-        if (trialBtn) {
-            trialBtn.addEventListener('click', function() {
-                openPaddle('pri_01ksm1s4zxbadbeaxhbp3rg3fz'); // โยนไอดีรายปีไปเริ่ม Trial
-            });
-        }
-
-        function openPaddle(targetPriceId) {
-            try {
-                Paddle.Checkout.open({
-                    settings: { displayMode: "overlay" },
-                    items: [{ priceId: targetPriceId, quantity: 1 }],
-                    customData: { user_id: userId, device_id: deviceId }
-                });
-            } catch (e) {
-                alert(lang === 'thai' ? "ระบบขัดข้องชั่วคราว! กรุณาลองใหม่อีกครั้ง" : "Temporary error! Please try again.");
-            }
-        }
-
-        // รองรับเงื่อนไขแปลภาษาไทยอัตโนมัติ
+        // 2. 🔥 [จุดแก้ไขหลัก] แปลภาษาทุกจุดบนหน้าเว็บก่อนทำอย่างอื่น เพื่อไม่ให้โดนเงื่อนไขอื่นซ่อนหรือบล็อก
         if (lang === 'thai') {
             document.getElementById('ui-title').innerText = 'อัปเกรดเป็นเวอร์ชัน Pro';
             document.getElementById('f1').innerText = 'เข้าถึงทุกโมดูลการออกแบบโครงสร้าง';
@@ -212,6 +173,59 @@
             document.getElementById('lnk-refund').innerText = 'นโยบายการคืนเงิน';
             document.getElementById('lnk-privacy').innerText = 'ความเป็นส่วนตัว';
             document.getElementById('lnk-terms').innerText = 'เงื่อนไขการบริการ';
+        }
+
+        // 3. เริ่มต้นระบบ Paddle Setup พร้อมสั่งให้หน้าต่างชำระเงินรองรับภาษาไทยตามสิทธิ์ของแอป
+        Paddle.Setup({ 
+            token: 'test_4c6336ab0eb5b58c83150a6fe29',
+            settings: {
+                locale: lang === 'thai' ? 'th' : 'en' // บังคับฟอร์มกรอกบัตร Paddle เป็นภาษาไทย
+            }
+        });
+
+        // 4. ลอจิกดักตรวจกรณีเปิดลิงก์แบบเลือกแพลนอัตโนมัติมาจากตัวแอป (ปลดล็อกบั๊กซ่อนภาษาไทย)
+        if (priceId && priceId.trim() !== '' && priceId.startsWith('pri_')) {
+            document.getElementById('view-plans').style.display = 'none';
+            document.getElementById('view-loading').style.display = 'block';
+            if (lang === 'thai') { 
+                document.getElementById('load-msg').innerText = "กำลังเชื่อมต่อกับระบบชำระเงิน Paddle ปลอดภัย..."; 
+            }
+            setTimeout(() => { openPaddle(priceId); }, 400);
+        }
+
+        // กดเลือกแผนสมาชิกแบบเลือกเองบนหน้าเว็บ
+        document.querySelectorAll('.plan-option').forEach(function(el) {
+            el.addEventListener('click', function() {
+                let selectedId = 'pri_01ksm1vzz6zg2hayb8zmenvnb4'; // รายเดือน
+                if (this.id === 'plan-yearly') {
+                    selectedId = 'pri_01ksm1s4zxbadbeaxhbp3rg3fz'; // รายปี
+                }
+                openPaddle(selectedId);
+            });
+        });
+
+        // ปุ่มกดทดลองใช้งานฟรี 7 วัน
+        const trialBtn = document.getElementById('btn-trial');
+        if (trialBtn) {
+            trialBtn.addEventListener('click', function() {
+                openPaddle('pri_01ksm1s4zxbadbeaxhbp3rg3fz'); // วิ่งเข้าแผนรายปีเพื่อเริ่มทดลองใช้ฟรี
+            });
+        }
+
+        // ฟังก์ชันสั่งเปิดหน้าต่างแสดงผลยืนยันการชำระเงินของ Paddle บังคับคุมภาษา
+        function openPaddle(targetPriceId) {
+            try {
+                Paddle.Checkout.open({
+                    settings: { 
+                        displayMode: "overlay",
+                        locale: lang === 'thai' ? 'th' : 'en' // ย้ำเรื่องภาษาไทยป้องกันหน้าต่างหลุด
+                    },
+                    items: [{ priceId: targetPriceId, quantity: 1 }],
+                    customData: { user_id: userId, device_id: deviceId }
+                });
+            } catch (e) {
+                alert(lang === 'thai' ? "ระบบขัดข้องชั่วคราว! กรุณาลองใหม่อีกครั้ง" : "Temporary error! Please try again.");
+            }
         }
     </script>
 </body>
