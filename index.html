@@ -9,47 +9,45 @@
         /* 🎨 คุมโทนสีหลัก และใส่ภาพฉากหลังแบบ PNG */
         body { 
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
-            /* ยังคงต้องมีพื้นหลังสีดำไว้ กรณีภาพ PNG โหลดช้าหรือมีความใส */
             background-color: #000000; 
             
-            /* 🌟 [จุดแก้ไขสำคัญ] ใส่ชื่อไฟล์ภาพ PNG ของคุณตรงนี้ */
-            /* สมมติว่าไฟล์ชื่อ background.png และวางอยู่ในโฟลเดอร์เดียวกับ .html */
+            /* ภาพฉากหลัง PNG ของคุณ */
             background-image: url('เพิ่มหัวเรื่องย่อย-3-2.png'); 
             
-            /* ตั้งค่าให้ภาพ PNG ขยายเต็มจอพอดี */
             background-size: cover;
-            /* ตั้งค่าให้ภาพอยู่ตรงกลาง */
             background-position: center;
-            /* ตั้งค่าไม่ให้ภาพปรากฏซ้ำ (ถ้าภาพเล็กกว่าจอ) */
             background-repeat: no-repeat;
-            /* ตั้งค่าให้ภาพฉากหลังอยู่นิ่ง เวลาเลื่อนหน้าจอ */
             background-attachment: fixed;
             
             color: #CAF8F4; 
             margin: 0; 
             display: flex; 
-            justify-content: center; 
+            
+            /* 🌟 [จุดแก้ไขสำคัญ] เปลี่ยนจาก center เป็น flex-start เพื่อดันกล่องทั้งหมดชิดซ้าย */
+            justify-content: flex-start; 
+            
+            /* ให้กล่องอยู่กึ่งกลางในแนวตั้งตามเดิม */
             align-items: center; 
             min-height: 100vh; 
         }
 
-        /* 📦 หน้าสไตล์ตู้ขายของ (Plan Selection) - โปร่งใส 60% สไตล์กระจกฝ้า */
+        /* 📦 หน้าสไตล์ตู้ขายของ (Plan Selection) - โปร่งใส 60% ชิดซ้าย */
         .card-plans { 
-            /* พื้นหลังสีดำจางๆ 60% */
             background: rgba(17, 17, 17, 0.6); 
-            /* เอฟเฟกต์เบลอฉากหลังเพื่อให้ตัวหนังสืออ่านง่าย (Glassmorphism) */
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
             
             padding: 30px; 
             border-radius: 16px; 
-            /* เส้นขอบบางๆ สีฟ้าใส */
             border: 1px solid rgba(85, 255, 255, 0.2); 
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5); 
             max-width: 450px; 
             width: 90%; 
             text-align: center;
             display: block; 
+            
+            /* 🌟 [จุดแก้ไขสำคัญ] เพิ่มระยะห่าง (Margin) จากขอบจอฝั่งซ้าย 50px เพื่อไม่ให้กล่องติดขอบจอเกินไป */
+            margin-left: 50px; 
         }
 
         /* 💎 สีฟ้าใส #55FFFF */
@@ -80,10 +78,22 @@
         .footer-links { display: flex; justify-content: space-evenly; margin-top: 25px; font-size: 11px; }
         .footer-links a { color: #64748b; text-decoration: underline; cursor: pointer; }
 
-        /* 🌀 หน้าโหลดดิ้งออโต้ */
+        /* 🌀 หน้าโหลดดิ้งออโต้ - ปรับโครงสร้างให้รองรับการชิดซ้ายสอดคล้องกัน */
         .card-loading {
+            background: rgba(17, 17, 17, 0.6);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 30px; 
+            border-radius: 16px; 
+            border: 1px solid rgba(85, 255, 255, 0.2); 
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5); 
+            max-width: 450px; 
+            width: 90%;
             text-align: center;
             display: none; 
+            
+            /* 🌟 [จุดแก้ไขสำคัญ] ดันกล่องโหลดดิ้งให้ชิดซ้ายและมีระยะห่างเท่ากับการ์ดเลือกแผน */
+            margin-left: 50px; 
         }
         .loader { 
             border: 4px solid #222222; 
@@ -93,6 +103,12 @@
         }
         .loading-text { color: #cbd5e1; font-size: 16px; line-height: 1.6; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* 📱 รองรับการแสดงผลบนหน้าจอมือถือขนาดเล็ก */
+        @media (max-width: 600px) {
+            body { justify-content: center; }
+            .card-plans, .card-loading { margin-left: 0; }
+        }
     </style>
 </head>
 <body>
