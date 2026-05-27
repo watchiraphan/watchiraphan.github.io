@@ -6,10 +6,25 @@
     <title>Auto RC PC - Premium Upgrade</title>
     <script src="https://cdn.paddle.com/paddle/v3/paddle.js"></script>
     <style>
-        /* 🎨 คุมโทนสีหลัก (DeepBlack & Dark Theme) */
+        /* 🎨 คุมโทนสีหลัก และใส่ภาพฉากหลังแบบ PNG */
         body { 
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+            /* ยังคงต้องมีพื้นหลังสีดำไว้ กรณีภาพ PNG โหลดช้าหรือมีความใส */
             background-color: #000000; 
+            
+            /* 🌟 [จุดแก้ไขสำคัญ] ใส่ชื่อไฟล์ภาพ PNG ของคุณตรงนี้ */
+            /* สมมติว่าไฟล์ชื่อ background.png และวางอยู่ในโฟลเดอร์เดียวกับ .html */
+            background-image: url('เพิ่มหัวเรื่องย่อย-3-2.png'); 
+            
+            /* ตั้งค่าให้ภาพ PNG ขยายเต็มจอพอดี */
+            background-size: cover;
+            /* ตั้งค่าให้ภาพอยู่ตรงกลาง */
+            background-position: center;
+            /* ตั้งค่าไม่ให้ภาพปรากฏซ้ำ (ถ้าภาพเล็กกว่าจอ) */
+            background-repeat: no-repeat;
+            /* ตั้งค่าให้ภาพฉากหลังอยู่นิ่ง เวลาเลื่อนหน้าจอ */
+            background-attachment: fixed;
+            
             color: #CAF8F4; 
             margin: 0; 
             display: flex; 
@@ -18,20 +33,26 @@
             min-height: 100vh; 
         }
 
-        /* 📦 หน้าสไตล์ตู้ขายของ (Plan Selection) - โชว์ทันทีเป็น Default */
+        /* 📦 หน้าสไตล์ตู้ขายของ (Plan Selection) - โปร่งใส 60% สไตล์กระจกฝ้า */
         .card-plans { 
-            background: #111111; 
+            /* พื้นหลังสีดำจางๆ 60% */
+            background: rgba(17, 17, 17, 0.6); 
+            /* เอฟเฟกต์เบลอฉากหลังเพื่อให้ตัวหนังสืออ่านง่าย (Glassmorphism) */
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            
             padding: 30px; 
             border-radius: 16px; 
-            border: 1px solid #222222; 
-            box-shadow: 0 4px 30px rgba(0,0,0,0.7); 
+            /* เส้นขอบบางๆ สีฟ้าใส */
+            border: 1px solid rgba(85, 255, 255, 0.2); 
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5); 
             max-width: 450px; 
             width: 90%; 
             text-align: center;
             display: block; 
         }
 
-        /* 💎 เปลี่ยนสีหัวข้อหลักเป็นฟ้า #55FFFF */
+        /* 💎 สีฟ้าใส #55FFFF */
         h1 { color: #55FFFF; margin-bottom: 20px; font-size: 24px; font-weight: bold; }
         
         .features-list { text-align: left; margin: 20px auto; max-width: 380px; }
@@ -39,23 +60,20 @@
         .feature-icon { color: #55FFFF; margin-right: 12px; font-size: 20px; flex-shrink: 0; }
 
         .plan-option {
-            background: #1a1a1a; border: 2px solid #333333; border-radius: 12px; padding: 16px;
+            background: rgba(26, 26, 26, 0.7); border: 2px solid #333333; border-radius: 12px; padding: 16px;
             margin-bottom: 12px; text-align: left; cursor: pointer; transition: all 0.2s;
             display: flex; justify-content: space-between; align-items: center;
         }
-        /* เส้นขอบตอนเลือกแผนเป็นสีฟ้า #55FFFF */
-        .plan-option.selected { border-color: #55FFFF; background: #111827; }
+        /* เส้นขอบตอนเลือกแผนสีฟ้าใส */
+        .plan-option.selected { border-color: #55FFFF; background: rgba(17, 24, 39, 0.8); }
         .plan-title { font-weight: bold; font-size: 16px; color: #ffffff; }
         .plan-desc { font-size: 12px; color: #94a3b8; margin-top: 4px; }
         .save-badge { background: #22c55e; color: #ffffff; font-size: 11px; padding: 2px 6px; border-radius: 4px; margin-left: 8px; }
-        /* สีตัวเลขราคาเป็นฟ้า #55FFFF */
         .plan-price { font-size: 18px; font-weight: bold; color: #55FFFF; }
 
-        /* ปุ่มหลักสีฟ้า #55FFFF ตัวหนังสือดำเข้ม */
         .btn-primary { background: #55FFFF; color: #000000; border: none; border-radius: 12px; width: 100%; padding: 14px; font-size: 16px; font-weight: 800; cursor: pointer; margin-top: 15px; }
         .btn-primary:hover { background: #33e6e6; }
         
-        /* ปุ่มทดลองใช้เส้นขอบฟ้า #55FFFF */
         .btn-trial { background: transparent; color: #55FFFF; border: 1px solid #55FFFF; border-radius: 12px; width: 100%; padding: 12px; font-size: 14px; font-weight: bold; cursor: pointer; margin-top: 10px; }
         .btn-trial:hover { background: rgba(85, 255, 255, 0.1); }
         
@@ -67,7 +85,6 @@
             text-align: center;
             display: none; 
         }
-        /* วงกลมโหลดดิ่งขอบบนเปลี่ยนเป็นฟ้า #55FFFF */
         .loader { 
             border: 4px solid #222222; 
             border-top: 4px solid #55FFFF; 
@@ -130,10 +147,8 @@
         const deviceId = urlParams.get('device_id') || 'review_device';
         const lang = urlParams.get('lang') || 'thai';
 
-        // 🌟 บัญชี Sandbox Token ของคุณ
         Paddle.Setup({ token: 'test_4c6336ab0eb5b58c83150a6fe29' });
 
-        // ราคาค่าเริ่มต้น
         let currentPriceId = 'pri_01ksm1vzz6zg2hayb8zmenvnb4'; 
 
         if (priceId && priceId.trim() !== '' && priceId.startsWith('pri_')) {
@@ -171,7 +186,6 @@
             }
         }
 
-        // 🌍 แผงคำแปลภาษาอังกฤษ
         if (lang !== 'thai') {
             document.getElementById('ui-title').innerText = 'Upgrade to Pro';
             document.getElementById('f1').innerText = 'Full access to all Structural Modules';
