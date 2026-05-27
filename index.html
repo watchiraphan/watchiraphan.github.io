@@ -10,31 +10,24 @@
         body { 
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
             background-color: #000000; 
-            
-            /* ภาพฉากหลัง PNG */
             background-image: url('เพิ่มหัวเรื่องย่อย-3-2.png'); 
-            
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
             background-attachment: fixed;
-            
             color: #CAF8F4; 
             margin: 0; 
             display: flex; 
-            
-            /* 🌟 บังคับโครงสร้างหน้าจอให้ชิดซ้ายสุด */
             justify-content: flex-start; 
             align-items: center; 
             min-height: 100vh; 
         }
 
-        /* 📦 หน้าสไตล์ตู้ขายของ (Plan Selection) - โปร่งใส 60% สไตล์กระจกฝ้าชิดซ้าย */
+        /* 📦 หน้าสไตล์ตู้ขายของ */
         .card-plans { 
             background: rgba(17, 17, 17, 0.6); 
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
-            
             padding: 30px; 
             border-radius: 16px; 
             border: 1px solid rgba(85, 255, 255, 0.2); 
@@ -43,25 +36,28 @@
             width: 90%; 
             text-align: center;
             display: block; 
-            
-            /* 🌟 ระยะห่างปลอดภัยจากขอบจอซ้ายมือ 50px */
             margin-left: 50px; 
         }
 
-        /* 💎 สีฟ้าใส #55FFFF */
         h1 { color: #55FFFF; margin-bottom: 20px; font-size: 24px; font-weight: bold; }
-        
         .features-list { text-align: left; margin: 20px auto; max-width: 380px; }
         .feature-item { display: flex; align-items: center; margin-bottom: 12px; font-size: 14px; color: #CAF8F4; }
         .feature-icon { color: #55FFFF; margin-right: 12px; font-size: 20px; flex-shrink: 0; }
 
+        /* 🚨 [จุดแก้ไขที่ 1] เติม pointer-events: none ให้ของข้างในกล่อง เพื่อบังคับให้ระบบกดโดนตัวกล่องเสมอ */
         .plan-option {
             background: rgba(26, 26, 26, 0.7); border: 2px solid #333333; border-radius: 12px; padding: 16px;
             margin-bottom: 12px; text-align: left; cursor: pointer; transition: all 0.2s;
             display: flex; justify-content: space-between; align-items: center;
         }
-        /* เส้นขอบตอนเลือกแผนสีฟ้าใส */
-        .plan-option.selected { border-color: #55FFFF !important; background: rgba(17, 24, 39, 0.8) !important; }
+        .plan-option * { pointer-events: none; } /* บังคับให้กดทะลุลงกล่องแม่ */
+        
+        /* 🚨 [จุดแก้ไขที่ 2] บังคับให้ขอบฟ้าทำงานแน่นอนด้วย !important */
+        .plan-option.selected { 
+            border-color: #55FFFF !important; 
+            background: rgba(17, 24, 39, 0.8) !important; 
+        }
+        
         .plan-title { font-weight: bold; font-size: 16px; color: #ffffff; }
         .plan-desc { font-size: 12px; color: #94a3b8; margin-top: 4px; }
         .save-badge { background: #22c55e; color: #ffffff; font-size: 11px; padding: 2px 6px; border-radius: 4px; margin-left: 8px; }
@@ -69,38 +65,20 @@
 
         .btn-primary { background: #55FFFF; color: #000000; border: none; border-radius: 12px; width: 100%; padding: 14px; font-size: 16px; font-weight: 800; cursor: pointer; margin-top: 15px; }
         .btn-primary:hover { background: #33e6e6; }
-        
         .btn-trial { background: transparent; color: #55FFFF; border: 1px solid #55FFFF; border-radius: 12px; width: 100%; padding: 12px; font-size: 14px; font-weight: bold; cursor: pointer; margin-top: 10px; }
         .btn-trial:hover { background: rgba(85, 255, 255, 0.1); }
-        
         .footer-links { display: flex; justify-content: space-evenly; margin-top: 25px; font-size: 11px; }
         .footer-links a { color: #64748b; text-decoration: underline; cursor: pointer; }
 
-        /* 🌀 หน้าโหลดดิ้งออโต้ - ชิดซ้ายระยะเท่ากันเวลาเปลี่ยนหน้า */
         .card-loading {
-            background: rgba(17, 17, 17, 0.6);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            padding: 30px; 
-            border-radius: 16px; 
-            border: 1px solid rgba(85, 255, 255, 0.2); 
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5); 
-            max-width: 450px; 
-            width: 90%;
-            text-align: center;
-            display: none; 
-            margin-left: 50px; 
+            background: rgba(17, 17, 17, 0.6); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            padding: 30px; border-radius: 16px; border: 1px solid rgba(85, 255, 255, 0.2); box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5); 
+            max-width: 450px; width: 90%; text-align: center; display: none; margin-left: 50px; 
         }
-        .loader { 
-            border: 4px solid #222222; 
-            border-top: 4px solid #55FFFF; 
-            border-radius: 50%; width: 50px; height: 50px; 
-            animation: spin 1s linear infinite; margin: 0 auto 20px; 
-        }
+        .loader { border: 4px solid #222222; border-top: 4px solid #55FFFF; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 0 auto 20px; }
         .loading-text { color: #cbd5e1; font-size: 16px; line-height: 1.6; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* 📱 จัดการหน้าจอมือถือให้กลับมาตรงกลางอัตโนมัติ */
         @media (max-width: 600px) {
             body { justify-content: center; }
             .card-plans, .card-loading { margin-left: 0; }
@@ -167,32 +145,29 @@
             currentPriceId = priceId;
             document.getElementById('view-plans').style.display = 'none';
             document.getElementById('view-loading').style.display = 'block';
-            
-            if(lang !== 'thai') {
-                document.getElementById('load-msg').innerText = "Connecting to Paddle's secure payment system...";
-            }
-            
+            if(lang !== 'thai') { document.getElementById('load-msg').innerText = "Connecting to Paddle's secure payment system..."; }
             setTimeout(() => { checkout(); }, 400);
         }
 
-        // 🌟 [เปลี่ยนวิธีผูกคำสั่งใหม่] ใช้ Event Listener ดักจับการกดที่ตัววัตถุโดยตรง 
-        // วิธีนี้จะช่วยแก้ปัญหากล่องดื้อ ไม่ยอมเปลี่ยนสี ได้แบบเด็ดขาดครับ
-        const monthlyBtn = document.getElementById('plan-monthly');
-        const yearlyBtn = document.getElementById('plan-yearly');
-
-        if (monthlyBtn && yearlyBtn) {
-            monthlyBtn.addEventListener('click', function() {
-                currentPriceId = 'pri_01ksm1vzz6zg2hayb8zmenvnb4';
-                monthlyBtn.classList.add('selected');
-                yearlyBtn.classList.remove('selected');
+        // 🚨 [จุดแก้ไขที่ 3] ใช้การดักคลิกแบบจับคู่ Class โดยตรง แก้ไขปัญหากดไม่ติดเด็ดขาด
+        document.querySelectorAll('.plan-option').forEach(function(el) {
+            el.addEventListener('click', function(e) {
+                // เอา class selected ออกจากทุกกล่อง
+                document.querySelectorAll('.plan-option').forEach(function(opt) {
+                    opt.classList.remove('selected');
+                });
+                
+                // ใส่ class selected ให้กล่องที่โดนกด
+                this.classList.add('selected');
+                
+                // สลับไอดีราคาชำระเงินตามจริง
+                if (this.id === 'plan-monthly') {
+                    currentPriceId = 'pri_01ksm1vzz6zg2hayb8zmenvnb4';
+                } else {
+                    currentPriceId = 'pri_01ksm1s4zxbadbeaxhbp3rg3fz';
+                }
             });
-
-            yearlyBtn.addEventListener('click', function() {
-                currentPriceId = 'pri_01ksm1s4zxbadbeaxhbp3rg3fz';
-                yearlyBtn.classList.add('selected');
-                monthlyBtn.classList.remove('selected');
-            });
-        }
+        });
 
         function checkout() {
             try {
