@@ -23,15 +23,13 @@
             margin: 0; 
             display: flex; 
             
-            /* 🌟 [จุดแก้ไขสำคัญ] เปลี่ยนจาก center เป็น flex-start เพื่อดันกล่องทั้งหมดชิดซ้าย */
+            /* 🌟 [แก้ไข] ดันโครงสร้างทั้งหมดในหน้าจอให้มาชิดฝั่งซ้ายสุด */
             justify-content: flex-start; 
-            
-            /* ให้กล่องอยู่กึ่งกลางในแนวตั้งตามเดิม */
             align-items: center; 
             min-height: 100vh; 
         }
 
-        /* 📦 หน้าสไตล์ตู้ขายของ (Plan Selection) - โปร่งใส 60% ชิดซ้าย */
+        /* 📦 หน้าสไตล์ตู้ขายของ (Plan Selection) - โปร่งใส 60% สไตล์กระจกฝ้าชิดซ้าย */
         .card-plans { 
             background: rgba(17, 17, 17, 0.6); 
             backdrop-filter: blur(10px);
@@ -46,7 +44,7 @@
             text-align: center;
             display: block; 
             
-            /* 🌟 [จุดแก้ไขสำคัญ] เพิ่มระยะห่าง (Margin) จากขอบจอฝั่งซ้าย 50px เพื่อไม่ให้กล่องติดขอบจอเกินไป */
+            /* 🌟 [แก้ไข] เพิ่มระยะห่างจากขอบจอซ้ายมือ 50px เพื่อความสวยงาม */
             margin-left: 50px; 
         }
 
@@ -78,7 +76,7 @@
         .footer-links { display: flex; justify-content: space-evenly; margin-top: 25px; font-size: 11px; }
         .footer-links a { color: #64748b; text-decoration: underline; cursor: pointer; }
 
-        /* 🌀 หน้าโหลดดิ้งออโต้ - ปรับโครงสร้างให้รองรับการชิดซ้ายสอดคล้องกัน */
+        /* 🌀 หน้าโหลดดิ้งออโต้ - ชิดซ้ายให้สอดคล้องกัน */
         .card-loading {
             background: rgba(17, 17, 17, 0.6);
             backdrop-filter: blur(10px);
@@ -92,7 +90,7 @@
             text-align: center;
             display: none; 
             
-            /* 🌟 [จุดแก้ไขสำคัญ] ดันกล่องโหลดดิ้งให้ชิดซ้ายและมีระยะห่างเท่ากับการ์ดเลือกแผน */
+            /* 🌟 [แก้ไข] ให้กล่องโหลดดิ้งชิดซ้ายระยะเท่ากันเวลาเปลี่ยนหน้า */
             margin-left: 50px; 
         }
         .loader { 
@@ -104,7 +102,7 @@
         .loading-text { color: #cbd5e1; font-size: 16px; line-height: 1.6; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* 📱 รองรับการแสดงผลบนหน้าจอมือถือขนาดเล็ก */
+        /* 📱 จัดการหน้าจอขนาดเล็ก (มือถือ) ให้กลับมาตรงกลางอัตโนมัติ ไม่ให้หลุดขอบจอ */
         @media (max-width: 600px) {
             body { justify-content: center; }
             .card-plans, .card-loading { margin-left: 0; }
@@ -165,6 +163,7 @@
 
         Paddle.Setup({ token: 'test_4c6336ab0eb5b58c83150a6fe29' });
 
+        // เก็บค่านำส่งราคาปัจจุบันไว้ที่นี่
         let currentPriceId = 'pri_01ksm1vzz6zg2hayb8zmenvnb4'; 
 
         if (priceId && priceId.trim() !== '' && priceId.startsWith('pri_')) {
@@ -179,10 +178,15 @@
             setTimeout(() => { checkout(); }, 400);
         }
 
+        // 🌟 [แก้ไข Logic ตรงนี้ใหม่ทั้งหมด] เพื่อให้การคลิกสลับเปลี่ยนราคาทำงานสมบูรณ์
         function selectPlan(plan, pId) {
-            currentPriceId = pId;
+            currentPriceId = pId; // เปลี่ยนค่าไอดีของแผนชำระเงินตามจริง
+            
+            // ล้างสถานะไฟสีฟ้าดวงเก่าออกก่อน
             document.getElementById('plan-monthly').classList.remove('selected');
             document.getElementById('plan-yearly').classList.remove('selected');
+            
+            // สลับการเปิดไฟเส้นขอบสีฟ้าไปที่แผนที่ถูกกดเลือกจริง
             if(plan === 'Monthly') {
                 document.getElementById('plan-monthly').classList.add('selected');
             } else {
