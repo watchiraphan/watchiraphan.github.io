@@ -168,7 +168,7 @@
         <button class="btn-trial" id="btn-trial">Start 7-Day Free Trial</button>
 
         <div class="footer-links">
-            <a id="lnk-restore" onclick="alert('System is processing item restoration...')">Restore Purchase</a>
+            <a href="#" id="lnk-restore">Restore Purchase</a>
             <a href="#" id="lnk-refund">Refund Policy</a>
             <a href="#" id="lnk-privacy">Privacy</a>
             <a href="#" id="lnk-terms">Terms of Service</a>
@@ -375,6 +375,85 @@
                 </p>
         
             </div>
+        </div>
+    <div id="view-restore" class="card-plans"
+style="
+    display:none;
+    position:relative;
+    animation: fadeIn 0.2s ease;
+">
+
+    <button id="btn-back-restore"
+        style="
+            position:absolute;
+            top:20px;
+            left:20px;
+            background:none;
+            border:none;
+            color:#55FFFF;
+            font-size:16px;
+            cursor:pointer;
+            font-weight:bold;
+        ">
+        ← Back
+    </button>
+
+    <h1 style="margin-top:20px;">Restore Purchase</h1>
+        
+            <div style="
+                text-align:left;
+                color:#cbd5e1;
+                line-height:1.8;
+                font-size:14px;
+                margin-top:20px;
+            ">
+        
+                Enter the email address used during your purchase to restore your subscription access.
+        
+            </div>
+        
+            <input
+                id="restore-email"
+                type="email"
+                placeholder="Enter your email"
+                style="
+                    width:100%;
+                    margin-top:20px;
+                    padding:14px;
+                    border-radius:10px;
+                    border:1px solid #334155;
+                    background:#111827;
+                    color:white;
+                    font-size:14px;
+                    box-sizing:border-box;
+                "
+            />
+        
+            <button id="btn-restore-submit"
+                style="
+                    width:100%;
+                    margin-top:16px;
+                    padding:14px;
+                    border:none;
+                    border-radius:12px;
+                    background:#55FFFF;
+                    color:black;
+                    font-weight:bold;
+                    cursor:pointer;
+                    font-size:15px;
+                ">
+                Restore Access
+            </button>
+        
+            <div id="restore-status"
+                style="
+                    margin-top:16px;
+                    color:#94a3b8;
+                    font-size:13px;
+                    text-align:center;
+                ">
+            </div>
+        
         </div>
     
     <div id="view-loading" class="card-loading">
@@ -652,6 +731,60 @@
             plansView.style.display = "block";
         
         });
+
+        const restoreLink = document.getElementById("lnk-restore");
+        const restoreView = document.getElementById("view-restore");
+        const backRestoreBtn = document.getElementById("btn-back-restore");
+        
+        restoreLink.addEventListener("click", function(e) {
+        
+            e.preventDefault();
+        
+            plansView.style.display = "none";
+            restoreView.style.display = "block";
+        
+        });
+        
+        backRestoreBtn.addEventListener("click", function() {
+        
+            restoreView.style.display = "none";
+            plansView.style.display = "block";
+        
+        });
+
+        document.getElementById("btn-restore-submit")
+        .addEventListener("click", async function() {
+        
+            const email = document.getElementById("restore-email").value.trim();
+        
+            const status = document.getElementById("restore-status");
+        
+            if (!email) {
+                status.innerText = "Please enter your email.";
+                return;
+            }
+        
+            status.innerText = "Checking subscription...";
+        
+            try {
+        
+                // TODO:
+                // เปลี่ยนเป็น backend จริงของคุณ
+        
+                await new Promise(resolve => setTimeout(resolve, 1500));
+        
+                status.innerText = "Subscription restored successfully.";
+        
+            } catch(err) {
+        
+                console.error(err);
+        
+                status.innerText = "Unable to restore purchase.";
+        
+            }
+        
+        });
+        
     </script>
 </body>
 </html>
