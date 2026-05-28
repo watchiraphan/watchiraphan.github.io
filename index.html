@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Auto RC PC - Premium Upgrade</title>
-    <script src="https://cdn.paddle.com/paddle/v2/paddle.js"></script>
+    <script src="https://cdn.paddle.com/paddle/paddle.js"></script>
     <style>
         body { 
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
@@ -172,14 +172,15 @@
             document.getElementById('lnk-terms').innerText = 'เงื่อนไขการบริการ';
         }
 
-        // 🛠️ แก้ไขจุดบกพร่องบรรทัด 180: ยอมรับสเปก v3 แบบละมุนละม่อมที่สุดตามที่ตัวสคริปต์บังคับ
+        // ✅ แก้ไขตามโครงสร้าง v3 บริสุทธิ์: สับท่อเซิร์ฟเวอร์ไป Sandbox และ Initialize ให้ถูกล็อก
         if (typeof Paddle !== 'undefined') {
+            Paddle.Environment.set("sandbox"); 
             Paddle.Initialize({ 
-                token: 'test_4c6336ab0eb5b58c83150a6fe29' // บังคับใส่ Client-side Token ของฝั่ง Sandbox ตัวเดียวกริบ ห้ามใส่คีย์อื่นปน
+                token: 'test_4c6336ab0eb5b58c83150a6fe29' 
             });
         }
 
-        // ลอจิกเปิดบิลอัตโนมัติเมื่อยิงลิงก์มาจากตัวแอป KMP
+        // ลอจิกเปิดบิลอัตโนมัติเมื่อกดมาจากตัวแอป KMP
         if (priceId && priceId.trim() !== '' && priceId.startsWith('pri_')) {
             document.getElementById('view-plans').style.display = 'none';
             document.getElementById('view-loading').style.display = 'block';
@@ -189,12 +190,12 @@
             setTimeout(() => { openPaddle(priceId); }, 400);
         }
 
-        // ดัก Event การคลิกเลือกแพ็กเกจบนหน้าเว็บ
+        // ผูก Event การคลิกเลือกแพ็กเกจบนหน้าจอคัสตอม
         document.querySelectorAll('.plan-option').forEach(function(el) {
             el.addEventListener('click', function() {
-                let selectedId = 'pri_01ksm1vzz6zg2hayb8zmenvnb4'; // ไอดีราคาจำลอง รายเดือน (ต้องดึงจากหน้า Sandbox Dashboard เท่านั้น)
+                let selectedId = 'pri_01ksm1vzz6zg2hayb8zmenvnb4'; // ไอดีราคาจำลอง รายเดือน (Sandbox เท่านั้น)
                 if (this.id === 'plan-yearly') {
-                    selectedId = 'pri_01ksm1s4zxbadbeaxhbp3rg3fz'; // ไอดีราคาจำลอง รายปี (ต้องดึงจากหน้า Sandbox Dashboard เท่านั้น)
+                    selectedId = 'pri_01ksm1s4zxbadbeaxhbp3rg3fz'; // ไอดีราคาจำลอง รายปี (Sandbox เท่านั้น)
                 }
                 openPaddle(selectedId);
             });
@@ -207,7 +208,7 @@
             });
         }
 
-        // ฟังก์ชันสั่งเรียกโครงสร้างเปิดหน้าต่างป๊อปอัปกรอกบัตรเครดิต
+        // ✅ ฟังก์ชันเปิดหน้าต่างป๊อปอัปสเปก v3 แบบคลีน 100% (ถอดกลุ่มคำสั่ง settings เจ้าปัญหาออก)
         function openPaddle(targetPriceId) {
             if (typeof Paddle === 'undefined') {
                 alert(lang === 'thai' ? "ไม่สามารถเรียกใช้งานระบบชำระเงินได้ กรุณาปิดตัวบล็อกโฆษณา" : "Checkout error. Please disable AdBlocker.");
@@ -215,14 +216,9 @@
             }
             try {
                 Paddle.Checkout.open({
-                    settings: {
-                        displayMode: "overlay",
-                        theme: "dark",
-                        locale: lang === 'thai' ? 'th' : 'en'
-                    },
                     items: [
                         {
-                            priceId: targetPriceId, // โครงสร้างมาตรฐาน v3 ป้องกันปัญหา Error 400 แท้จริง
+                            priceId: targetPriceId,
                             quantity: 1
                         }
                     ],
