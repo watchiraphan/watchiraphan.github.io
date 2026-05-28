@@ -205,14 +205,18 @@
 
         // 📌 จุดที่เพิ่ม: เรียกดึงราคาแบบเรียลไทม์จากระบบ Paddle ทันทีเมื่อโหลดหน้าเว็บสำเร็จ
         if (typeof Paddle !== 'undefined') {
-            Paddle.Product.Prices([ID_MONTHLY, ID_YEARLY], function(prices) {
-                if (prices && prices.products) {
-                    prices.products.forEach(function(prod) {
-                        // ดึงยอดสุทธิรวมภาษี (gross) พร้อมสัญลักษณ์สกุลเงินมาโชว์
-                        if (prod.priceId === ID_MONTHLY) {
-                            document.getElementById('p-price-monthly').innerText = prod.price.gross;
-                        } else if (prod.priceId === ID_YEARLY) {
-                            document.getElementById('p-price-yearly').innerText = prod.price.gross;
+            Paddle.api({
+                path: '/2.0/prices',
+                data: { product_ids: `${ID_MONTHLY},${ID_YEARLY}` }
+            }, function(response) {
+                // ตรวจสอบว่ามีข้อมูลราคาตีกลับมาจากเซิร์ฟเวอร์ Paddle ไหม
+                if (response && response.response && response.response.products) {
+                    response.response.products.forEach(function(prod) {
+                        // ดึงยอดสุทธิรวมภาษี (recurring_price) พร้อมสัญลักษณ์เงินประจำพื้นที่ผู้ใช้มาแสดง
+                        if (prod.product_id.toString() === ID_MONTHLY || prod.product_id === ID_MONTHLY) {
+                            document.getElementById('p-price-monthly').innerText = prod.recurring_price;
+                        } else if (prod.product_id.toString() === ID_YEARLY || prod.product_id === ID_YEARLY) {
+                            document.getElementById('p-price-yearly').innerText = prod.recurring_price;
                         }
                     });
                 }
