@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Auto RC PC - Premium Upgrade</title>
-    <script src="https://cdn.paddle.com/paddle/v3"></script>
+    <script src="https://cdn.paddle.com/paddle/v2/paddle.js"></script>
     <style>
         body { 
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
@@ -152,7 +152,7 @@
         let priceId = urlParams.get('price_id') || '';
         const userId = urlParams.get('user_id') || 'review_user';
         const deviceId = urlParams.get('device_id') || 'review_device';
-        const emailUser = urlParams.get('email') || ''; // 📌 ดึงค่าอีเมลที่เข้ารหัสส่งมาจากแอปพลิเคชัน
+        const emailUser = urlParams.get('email') || ''; // 📌 ดึงค่าอีเมลที่ส่งมาจากลิงก์
         const lang = urlParams.get('lang') || 'en'; 
 
         if (lang === 'thai') {
@@ -173,6 +173,7 @@
             document.getElementById('lnk-terms').innerText = 'เงื่อนไขการบริการ';
         }
 
+        // ✅ คงโครงสร้างการ Initialize เดิมของวิศวกรไว้เป๊ะๆ ห้ามบิดพริ้ว
         Paddle.Environment.set("sandbox");
         Paddle.Initialize({
             token: 'test_4c6336ab0eb5b58c83150a6fe29'
@@ -193,9 +194,9 @@
         // ดัก Event ปุ่มคลิกเลือกแพ็กเกจบนหน้าจอ
         document.querySelectorAll('.plan-option').forEach(function(el) {
             el.addEventListener('click', function() {
-                let selectedId = 'pri_01ksm1vzz6zg2hayb8zmenvnb4'; // ไอดีราคา รายเดือน Sandbox ตัวจริง
+                let selectedId = 'pri_01ksm1vzz6zg2hayb8zmenvnb4'; // รายเดือน Sandbox
                 if (this.id === 'plan-yearly') {
-                    selectedId = 'pri_01ksm1s4zxbadbeaxhbp3rg3fz'; // ไอดีราคา รายปี Sandbox ตัวจริง
+                    selectedId = 'pri_01ksm1s4zxbadbeaxhbp3rg3fz'; // รายปี Sandbox
                 }
                 openCheckout([{ priceId: selectedId, quantity: 1 }]);
             });
@@ -207,20 +208,9 @@
                 openCheckout([{ priceId: 'pri_01ksm1s4zxbadbeaxhbp3rg3fz', quantity: 1 }]);
             });
         }
-        function openCheckout(items){
-            Paddle.Checkout.open({
-              items: items,
-              customer: {
-                    email: "sam@example.com",
-                    address: {
-                      countryCode: "US",
-                      postalCode: "10021"
-                    }
-                  }
-            });
-          }
-        // ✅ ฟังก์ชันเปิดหน้าต่างรับตัวแปรอาร์เรย์ items และจัดการข้อมูลอีเมลลูกค้าเรียบร้อย
-        function openCheckout2(items) {
+          
+        // ✅ ฟังก์ชันเปิดหน้าต่างแบบคู่มือเป๊ะๆ เพิ่มเติมแค่คีย์ข้อมูลลูกค้า
+        function openCheckout(items) {
             if (typeof Paddle === 'undefined') {
                 alert(lang === 'thai' ? "ไม่สามารถเรียกใช้งานระบบชำระเงินได้ กรุณาปิดตัวบล็อกโฆษณา" : "Checkout error. Please disable AdBlocker.");
                 return;
@@ -233,8 +223,7 @@
                     deviceId: deviceId,
                     email: emailUser
                 });
- 
-                // สร้างโครงสร้างการเปิดบิลตามมาตรฐาน Paddle v3
+
                 let checkoutOptions = {
                     items: items,
                     settings: {
@@ -248,7 +237,7 @@
                     }
                 };
 
-                // 📌 หากมีการส่งค่าอีเมลมาจากแอป ให้ทำการฉีดเข้าออบเจกต์ customer เพื่อกรอกบนฟอร์มหน้าจออัตโนมัติ
+                // 📌 จุดที่เพิ่ม: แทรกข้อมูลอีเมลเข้าไปในพารามิเตอร์ของระบบเปิดบิลเดิม
                 if (emailUser && emailUser.trim() !== '') {
                     checkoutOptions.customer = {
                         email: emailUser
