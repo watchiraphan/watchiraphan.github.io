@@ -216,7 +216,7 @@
                 alert(lang === 'thai' ? "ไม่สามารถเรียกใช้งานระบบชำระเงินได้ กรุณาปิดตัวบล็อกโฆษณา" : "Checkout error. Please disable AdBlocker.");
                 return;
             }
-            try {
+            //try {
                 Paddle.Checkout.open({
                     items: items,
                     settings: {
@@ -230,10 +230,10 @@
                     }
                 });
               
-            } catch (e) {
+            /*} catch (e) {
                 console.error("Checkout System Error:", e);
                 alert(lang === 'thai' ? "เกิดข้อผิดพลาดในการเปิดระบบชำระเงิน" : "Error opening checkout.");
-            }
+            }*/
         }
     </script>
 </body>
