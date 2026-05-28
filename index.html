@@ -299,12 +299,13 @@
 
         if (priceId && priceId.trim() !== '' && priceId.startsWith('pri_')) {
             document.getElementById('view-loading').style.display = 'flex';
-            setTimeout(() => {
+            /*setTimeout(() => {
                 document.getElementById('view-loading').style.display = 'none';
-            }, 10000);
-            /*setTimeout(() => { 
+            }, 10000);*/
+            setTimeout(() => { 
+                document.getElementById('view-loading').style.display = 'none';
                 openCheckout([{ priceId: priceId, quantity: 1 }]); 
-            }, 400);*/
+            }, 400);
         }
 
         document.querySelectorAll('.plan-option').forEach(function(el) {
