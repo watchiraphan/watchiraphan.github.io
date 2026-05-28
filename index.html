@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Auto RC PC - Premium Upgrade</title>
-    <script src="https://cdn.paddle.com/paddle/paddle.js"></script>
+    <script src="https://cdn.paddle.com/paddle/v2/paddle.js"></script>
     <style>
         body { 
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
@@ -149,7 +149,7 @@
 
     <script type="text/javascript">
         const urlParams = new URLSearchParams(window.location.search);
-        let priceId = urlParams.get('price_id') || '';
+        let priceId = urlParams.get('price_id') || ''; // ในระบบ v2 จะส่งมาเป็นตัวเลข ID สินค้าตรงๆ จากแอป KMP
         const userId = urlParams.get('user_id') || 'review_user';
         const deviceId = urlParams.get('device_id') || 'review_device';
         const lang = urlParams.get('lang') || 'en'; 
@@ -172,30 +172,32 @@
             document.getElementById('lnk-terms').innerText = 'เงื่อนไขการบริการ';
         }
 
-        // ✅ แก้ไขตามโครงสร้าง v3 บริสุทธิ์: สับท่อเซิร์ฟเวอร์ไป Sandbox และ Initialize ให้ถูกล็อก
+        // ✅ ยึดสถาปัตยกรรมระดับรากฐานของ Paddle v2 ดั้งเดิมอย่างเป็นทางการ
         if (typeof Paddle !== 'undefined') {
-            Paddle.Environment.set("sandbox"); 
-            Paddle.Initialize({ 
-                token: 'test_4c6336ab0eb5b58c83150a6fe29' 
+            Paddle.Environment.set('sandbox'); // 🔥 สับท่อเซิร์ฟเวอร์ v2 ไปที่ Sandbox ป้องกัน 403 CORS 
+            Paddle.Setup({ 
+                vendor: 12345 // ⚠️ เปลี่ยนเป็นเลข Vendor ID (ตัวเลขล้วน) จากหน้า Paddle Sandbox Classic ของวิศวกร
             });
         }
 
         // ลอจิกเปิดบิลอัตโนมัติเมื่อกดมาจากตัวแอป KMP
-        if (priceId && priceId.trim() !== '' && priceId.startsWith('pri_')) {
+        if (priceId && priceId.trim() !== '') {
             document.getElementById('view-plans').style.display = 'none';
             document.getElementById('view-loading').style.display = 'block';
             if (lang === 'thai') { 
                 document.getElementById('load-msg').innerText = "กำลังเชื่อมต่อกับระบบชำระเงิน Paddle ปลอดภัย..."; 
             }
-            setTimeout(() => { openPaddle(priceId); }, 400);
+            // ป้องกันปัญหารันไทม์ v2 ค้างชั่วขณะ ให้หน่วงเวลาก่อนดึงโมดูลเปิดขึ้นมานิดนึง
+            setTimeout(() => { openPaddle(Number(priceId)); }, 400); 
         }
 
-        // ผูก Event การคลิกเลือกแพ็กเกจบนหน้าจอคัสตอม
+        // ดัก Event การคลิกเลือกแพ็กเกจคัสตอมบนหน้าจอ
         document.querySelectorAll('.plan-option').forEach(function(el) {
             el.addEventListener('click', function() {
-                let selectedId = 'pri_01ksm1vzz6zg2hayb8zmenvnb4'; // ไอดีราคาจำลอง รายเดือน (Sandbox เท่านั้น)
+                // ⚠️ สำหรับระบบ v2 ไอดีสินค้า (Product ID หรือ Plan ID) จะต้องเป็นเลขล้วนที่เจนมาจาก Classic Dashboard เท่านั้น
+                let selectedId = 123456; // เลขไอดีรายเดือนจำลอง v2 
                 if (this.id === 'plan-yearly') {
-                    selectedId = 'pri_01ksm1s4zxbadbeaxhbp3rg3fz'; // ไอดีราคาจำลอง รายปี (Sandbox เท่านั้น)
+                    selectedId = 789012; // เลขไอดีรายปีจำลอง v2
                 }
                 openPaddle(selectedId);
             });
@@ -204,31 +206,33 @@
         const trialBtn = document.getElementById('btn-trial');
         if (trialBtn) {
             trialBtn.addEventListener('click', function() {
-                openPaddle('pri_01ksm1s4zxbadbeaxhbp3rg3fz');
+                openPaddle(789012); // ใส่ไอดีรายปีจำลอง v2 ตัวเดียวกับปุ่มหลัก
             });
         }
 
-        // ✅ ฟังก์ชันเปิดหน้าต่างป๊อปอัปสเปก v3 แบบคลีน 100% (ถอดกลุ่มคำสั่ง settings เจ้าปัญหาออก)
-        function openPaddle(targetPriceId) {
+        // ✅ ฟังก์ชันเปิดหน้าต่างชำระเงินมาตรฐานสเปก v2 ดั้งเดิมแท้ 100%
+        function openPaddle(targetProductId) {
             if (typeof Paddle === 'undefined') {
                 alert(lang === 'thai' ? "ไม่สามารถเรียกใช้งานระบบชำระเงินได้ กรุณาปิดตัวบล็อกโฆษณา" : "Checkout error. Please disable AdBlocker.");
                 return;
             }
             try {
                 Paddle.Checkout.open({
-                    items: [
-                        {
-                            priceId: targetPriceId,
-                            quantity: 1
-                        }
-                    ],
-                    customData: { 
-                        user_id: userId, 
-                        device_id: deviceId 
+                    product: targetProductId, // ใช้คีย์ product ส่งผ่านเลข ID ตรงๆ ตามสเปก v2
+                    allowQuantity: false,
+                    displayMode: "overlay",
+                    disableLogout: true,
+                    locale: lang === 'thai' ? 'th' : 'en',
+                    passthrough: JSON.stringify({ user_id: userId, device_id: deviceId }), // ส่ง Meta ข้ามระบบสไตล์ v2 คลาสสิก
+                    successCallback: function(data) {
+                        console.log("Paddle v2 Payment Success:", data);
+                    },
+                    closeCallback: function(data) {
+                        console.log("Paddle v2 Closed", data);
                     }
                 });
             } catch (e) {
-                console.error("Checkout System Error:", e);
+                console.error("v2 Checkout System Error:", e);
                 alert(lang === 'thai' ? "เกิดข้อผิดพลาดในการเปิดระบบชำระเงิน" : "Error opening checkout.");
             }
         }
