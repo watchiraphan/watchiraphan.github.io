@@ -209,6 +209,17 @@
                 openCheckout([{ priceId: 'pri_01ksm1s4zxbadbeaxhbp3rg3fz', quantity: 1 }]);
             });
         }
+
+         let itemsList = [
+            {
+              priceId: "pri_01ksm1vzz6zg2hayb8zmenvnb4",
+              quantity: 1
+            },
+            {
+              priceId: "pri_01ksm1s4zxbadbeaxhbp3rg3fz",
+              quantity: 1
+            }
+          ];
         let customer = {
             email: "sam@example.com",
             address: {
@@ -220,7 +231,7 @@
           // open checkout
           function openCheckout(items){
             Paddle.Checkout.open({
-              items: items,
+              items: itemsList,
               customer: customer
             });
           }
