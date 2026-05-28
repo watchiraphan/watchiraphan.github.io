@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Auto RC PC - Premium Upgrade</title>
-    <script src="https://cdn.paddle.com/paddle/v2/paddle.js"></script>
+    <script src="https://cdn.paddle.com/paddle/paddle.js"></script>
     <style>
         body { 
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
@@ -219,11 +219,17 @@
             try {
                 Paddle.Checkout.open({
                     items: items,
+                    settings: {
+                        displayMode: "overlay",
+                        theme: "dark",
+                        locale: lang === 'thai' ? 'th' : 'en'
+                    },
                     customData: { 
                         user_id: userId, 
                         device_id: deviceId 
                     }
                 });
+              
             } catch (e) {
                 console.error("Checkout System Error:", e);
                 alert(lang === 'thai' ? "เกิดข้อผิดพลาดในการเปิดระบบชำระเงิน" : "Error opening checkout.");
