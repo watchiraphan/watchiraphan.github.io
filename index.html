@@ -169,7 +169,7 @@
 
         <div class="footer-links">
             <a id="lnk-restore" onclick="alert('System is processing item restoration...')">Restore Purchase</a>
-            <a href="https://autorc-design.carrd.co/#refund" target="_blank" id="lnk-refund">Refund Policy</a>
+            <a href="#" id="lnk-refund">Refund Policy</a>
             <a href="#" id="lnk-privacy">Privacy</a>
             <a href="#" id="lnk-terms">Terms of Service</a>
            
@@ -311,6 +311,67 @@
                     If you have any questions regarding these terms, please contact us at:
                     <br><br>
                     watchiraphan_bajang@hotmail.com
+                </p>
+        
+            </div>
+        </div>
+    <div id="view-refund" class="card-plans"
+        style="
+            display:none;
+            position:relative;
+            animation: fadeIn 0.2s ease;
+        ">
+        
+            <button id="btn-back-refund"
+                style="
+                    position:absolute;
+                    top:20px;
+                    left:20px;
+                    background:none;
+                    border:none;
+                    color:#55FFFF;
+                    font-size:16px;
+                    cursor:pointer;
+                    font-weight:bold;
+                ">
+                ← Back
+            </button>
+        
+            <h1 style="margin-top:20px;">Refund Policy</h1>
+        
+            <div style="
+                text-align:left;
+                color:#cbd5e1;
+                line-height:1.8;
+                font-size:14px;
+                margin-top:20px;
+                max-height:70vh;
+                overflow-y:auto;
+                padding-right:10px;
+            ">
+        
+                <p>
+                    <b>1. 14-Day Money-Back Guarantee</b><br>
+                    We want you to be fully satisfied with Auto RC. If the software does not meet your expectations, you are eligible for a full refund within 14 days of your initial purchase. This guarantee is provided without any additional conditions or exceptions to ensure a smooth experience for our users.
+                </p>
+        
+                <p>
+                    <b>2. How to Request a Refund</b><br>
+                    To request a refund, please contact our support team at:
+                    <br><br>
+                    watchiraphan_bajang@hotmail.com
+                    <br><br>
+                    with your order ID provided by Paddle.
+                </p>
+        
+                <p>
+                    <b>3. Refund Processing</b><br>
+                    Once approved, the refund will be processed via Paddle and credited back to your original payment method (Credit Card or PayPal) within 5-10 business days.
+                </p>
+        
+                <p>
+                    <b>4. Cancellation</b><br>
+                    You can cancel your subscription at any time. After cancellation, you will continue to have access to Pro features until the end of your current billing cycle.
                 </p>
         
             </div>
@@ -568,6 +629,26 @@
         backTermsBtn.addEventListener("click", function() {
         
             termsView.style.display = "none";
+            plansView.style.display = "block";
+        
+        });
+
+        const refundLink = document.getElementById("lnk-refund");
+        const refundView = document.getElementById("view-refund");
+        const backRefundBtn = document.getElementById("btn-back-refund");
+        
+        refundLink.addEventListener("click", function(e) {
+        
+            e.preventDefault();
+        
+            plansView.style.display = "none";
+            refundView.style.display = "block";
+        
+        });
+        
+        backRefundBtn.addEventListener("click", function() {
+        
+            refundView.style.display = "none";
             plansView.style.display = "block";
         
         });
