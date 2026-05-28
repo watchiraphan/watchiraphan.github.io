@@ -201,47 +201,77 @@
         Paddle.Initialize({
             token: 'test_4c6336ab0eb5b58c83150a6fe29',
             eventCallback: function(data) {
-                console.log("=== PADDLE DEBUG EVENT TRIGGERED ===", data.event, data);
 
-                // 📌 จุดสำคัญ: เพิ่มกลุ่ม Event ตระกูล closed เข้ามาเพื่อสั่งปิดหน้าโหลดเมื่อผู้ใช้ยกเลิกหรือปิดหน้าต่างชำระเงิน
-                const targetCloseEvents = [
-                    'checkout.loaded', 'Checkout.Loaded',
-                    'checkout.rendering', 'Checkout.Rendering',
-                    'checkout.displayed', 'Checkout.Displayed',
-                    'checkout.opened', 'Checkout.Opened',
-                    'checkout.closed', 'Checkout.Closed' 
-                ];
-
-                if (targetCloseEvents.includes(data.event)) {
-                    console.log(`🎯 พบเจอ Event สำหรับสั่งปิดหน้าโหลด: ${data.event}`);
-                    document.getElementById('view-loading').style.display = 'none';
+                console.log("PADDLE EVENT:", data.name, data);
+            
+                const loading = document.getElementById('view-loading');
+            
+                switch (data.name) {
+            
+                    // โหลดเสร็จ + แสดง popup แล้ว
+                    case "checkout.loaded":
+                    case "checkout.completed":
+                    case "checkout.payment.initiated":
+                    case "checkout.customer.created":
+                    case "checkout.updated":
+                        loading.style.display = "none";
+                        break;
+            
+                    // ผู้ใช้กดปิด popup
+                    case "checkout.closed":
+                        loading.style.display = "none";
+                        break;
+            
+                    // เปิด popup
+                    case "checkout.opened":
+                        loading.style.display = "flex";
+                        break;
                 }
             }
         });
 
         if (typeof Paddle !== 'undefined') {
             try {
-                Paddle.Price.preview({
+                   Paddle.PricePreview({
                     items: [
-                        { priceId: ID_MONTHLY, quantity: 1 },
-                        { priceId: ID_YEARLY, quantity: 1 }
+                        {
+                            priceId: ID_MONTHLY,
+                            quantity: 1
+                        },
+                        {
+                            priceId: ID_YEARLY,
+                            quantity: 1
+                        }
                     ]
-                }).then(function(result) {
-                    console.log("=== 1. PADDLE v3 PRICE PREVIEW DATA ===", result);
-                    if (result && result.details && result.details.lineItems) {
-                        result.details.lineItems.forEach(function(item) {
-                            console.log(`[V3 Method] ไอดีราคา: ${item.priceId} -> ราคาสุทธิ: ${item.totals.total}`);
-                            
-                            if (item.priceId === ID_MONTHLY) {
-                                document.getElementById('p-price-monthly').innerText = item.formattedTotals.total;
-                            } else if (item.priceId === ID_YEARLY) {
-                                document.getElementById('p-price-yearly').innerText = item.formattedTotals.total;
-                            }
-                        });
-                    }
-                }).catch(function(err) {
-                    console.warn("เกิดข้อผิดพลาดในการเรียก Preview ราคา (V3) กำลังรันแผนสำรอง...", err);
-                    runFallbackPriceFetch();
+                })
+                .then((result) => {
+                
+                    console.log("PRICE RESULT", result);
+                
+                    if (!result || !result.data || !result.data.details) return;
+                
+                    const items = result.data.details.lineItems;
+                
+                    items.forEach((item) => {
+                
+                        const currentPriceId = item.price.id;
+                        const formattedPrice = item.formattedTotals.total;
+                
+                        console.log(currentPriceId, formattedPrice);
+                
+                        if (currentPriceId === ID_MONTHLY) {
+                            document.getElementById("p-price-monthly").innerText = formattedPrice;
+                        }
+                
+                        if (currentPriceId === ID_YEARLY) {
+                            document.getElementById("p-price-yearly").innerText = formattedPrice;
+                        }
+                
+                    });
+                
+                })
+                .catch((err) => {
+                    console.error("PRICE PREVIEW ERROR", err);
                 });
             } catch(err) {
                 console.warn("ไม่สามารถรันคำสั่ง Paddle.Price.preview ได้ สลับไปใช้แผนสำรองทันที...", err);
@@ -269,9 +299,12 @@
 
         if (priceId && priceId.trim() !== '' && priceId.startsWith('pri_')) {
             document.getElementById('view-loading').style.display = 'flex';
-            setTimeout(() => { 
+            setTimeout(() => {
+                document.getElementById('view-loading').style.display = 'none';
+            }, 10000);
+            /*setTimeout(() => { 
                 openCheckout([{ priceId: priceId, quantity: 1 }]); 
-            }, 400);
+            }, 400);*/
         }
 
         document.querySelectorAll('.plan-option').forEach(function(el) {
@@ -298,7 +331,9 @@
             }
             try {
                 document.getElementById('view-loading').style.display = 'flex';
-
+                setTimeout(() => {
+                    document.getElementById('view-loading').style.display = 'none';
+                }, 10000);
                 console.log("=== INITIATING CHECKOUT ===", {
                     items: items,
                     lang: lang,
@@ -331,6 +366,9 @@
             } catch (e) {
                 console.error("Checkout System Error:", e);
                 document.getElementById('view-loading').style.display = 'none';
+                setTimeout(() => {
+                    document.getElementById('view-loading').style.display = 'none';
+                }, 10000);
                 alert(lang === 'thai' ? "เกิดข้อผิดพลาดในการเปิดระบบชำระเงิน" : "Error opening checkout.");
             }
         }
