@@ -153,11 +153,78 @@
         <div class="footer-links">
             <a id="lnk-restore" onclick="alert('System is processing item restoration...')">Restore Purchase</a>
             <a href="https://autorc-design.carrd.co/#refund" target="_blank" id="lnk-refund">Refund Policy</a>
-            <a href="https://autorc-design.carrd.co/#privacy" target="_blank" id="lnk-privacy">Privacy</a>
+            <a href="#" id="lnk-privacy">Privacy</a>
+        
             <a href="https://autorc-design.carrd.co/#terms" target="_blank" id="lnk-terms">Terms of Service</a>
         </div>
     </div>
+    
+       <div id="view-privacy" class="card-plans"
+            style="
+                display:none;
+                position:relative;
+                animation: fadeIn 0.2s ease;
+            ">
+                    
+            <button id="btn-back-privacy"
+                style="
+                    position:absolute;
+                    top:20px;
+                    left:20px;
+                    background:none;
+                    border:none;
+                    color:#55FFFF;
+                    font-size:16px;
+                    cursor:pointer;
+                    font-weight:bold;
+                ">
+                ← Back
+            </button>
+        
+            <h1 style="margin-top:20px;">Privacy Policy</h1>
+        
+            <div style="
+                text-align:left;
+                color:#cbd5e1;
+                line-height:1.8;
+                font-size:14px;
+                margin-top:20px;
+                max-height:70vh;
+                overflow-y:auto;
+                padding-right:10px;
+            ">
+        
+                <p>
+                    <b>1. Information We Collect</b><br>
+                    We collect minimal personal information necessary to provide our services, including your email address for account management and transaction history through our payment processor.
+                </p>
+        
+                <p>
+                    <b>2. Data Usage</b><br>
+                    Your data is used only to manage your subscription, provide technical support, and improve the software's functionality. We do not sell your personal data to third parties.
+                </p>
+        
+                <p>
+                    <b>3. Payment Security</b><br>
+                    All financial transactions are processed securely by Paddle, our Merchant of Record. We do not store your credit card information on our servers.
+                </p>
+        
+                <p>
+                    <b>4. Engineering Data</b><br>
+                    Any structural design data or calculations created within the app are stored locally on your device.
+                </p>
+        
+                <p>
+                    <b>5. Contact Us</b><br>
+                    If you have any questions about this policy, please contact:
+                    <br><br>
+                    watchiraphan_bajang@hotmail.com
+                </p>
+        
+            </div>
+        </div>
 
+    
     <div id="view-loading" class="card-loading">
         <div class="loader-box">
             <div class="loader"></div>
@@ -371,6 +438,43 @@
                     document.getElementById('view-loading').style.display = 'none';
                 }, 10000);
                 alert(lang === 'thai' ? "เกิดข้อผิดพลาดในการเปิดระบบชำระเงิน" : "Error opening checkout.");
+            }
+        }
+        const privacyLink = document.getElementById("lnk-privacy");
+        const privacyView = document.getElementById("view-privacy");
+        const plansView = document.getElementById("view-plans");
+        const backPrivacyBtn = document.getElementById("btn-back-privacy");
+        
+        privacyLink.addEventListener("click", function(e) {
+        
+            e.preventDefault();
+        
+            plansView.style.display = "none";
+            privacyView.style.display = "block";
+        
+        });
+        
+        backPrivacyBtn.addEventListener("click", function() {
+        
+            privacyView.style.display = "none";
+            plansView.style.display = "block";
+        
+        });
+        @media (max-width: 600px) {
+            body { justify-content: center; }
+            .card-plans { margin-left: 0; }
+        }
+        
+        /* วางตรงนี้ */
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0px);
             }
         }
     </script>
