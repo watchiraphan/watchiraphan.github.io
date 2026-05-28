@@ -250,7 +250,7 @@
         }
 
         function runFallbackPriceFetch() {
-            console.log("ID_MONTHLY",ID_MONTHLY")
+           
             fetch(`https://sandbox-checkout.paddle.com/api/2.0/prices?product_ids=${ID_MONTHLY},${ID_YEARLY}`)
             .then(res => res.json())
             .then(resData => {
