@@ -171,8 +171,8 @@
             <a id="lnk-restore" onclick="alert('System is processing item restoration...')">Restore Purchase</a>
             <a href="https://autorc-design.carrd.co/#refund" target="_blank" id="lnk-refund">Refund Policy</a>
             <a href="#" id="lnk-privacy">Privacy</a>
-        
-            <a href="https://autorc-design.carrd.co/#terms" target="_blank" id="lnk-terms">Terms of Service</a>
+            <a href="#" id="lnk-terms">Terms of Service</a>
+           
         </div>
     </div>
     
@@ -234,13 +234,87 @@
                 <p>
                     <b>5. Contact Us</b><br>
                     If you have any questions about this policy, please contact:
+                    <br>
+                    watchiraphan_bajang@hotmail.com
+                </p>
+        
+            </div>
+        </div>
+    
+        <div id="view-terms" class="card-plans"
+        style="
+            display:none;
+            position:relative;
+            animation: fadeIn 0.2s ease;
+        ">
+        
+            <button id="btn-back-terms"
+                style="
+                    position:absolute;
+                    top:20px;
+                    left:20px;
+                    background:none;
+                    border:none;
+                    color:#55FFFF;
+                    font-size:16px;
+                    cursor:pointer;
+                    font-weight:bold;
+                ">
+                ← Back
+            </button>
+        
+            <h1 style="margin-top:20px;">Terms and Conditions</h1>
+        
+            <div style="
+                text-align:left;
+                color:#cbd5e1;
+                line-height:1.8;
+                font-size:14px;
+                margin-top:20px;
+                max-height:70vh;
+                overflow-y:auto;
+                padding-right:10px;
+            ">
+        
+                <p>
+                    <b>1. Acceptance of Terms</b><br>
+                    By accessing and using Auto RC software, you agree to be bound by these Terms and Conditions. If you do not agree, please do not use the software.
+                </p>
+        
+                <p>
+                    <b>2. License Grant</b><br>
+                    We grant you a non-exclusive, non-transferable license to use Auto RC for structural engineering design and analysis purposes. Each license is valid for the period specified in your chosen plan (Monthly or Yearly).
+                </p>
+        
+                <p>
+                    <b>3. Engineering Responsibility (Disclaimer)</b><br>
+                    Auto RC is a tool to assist in structural design. The final responsibility for the accuracy and safety of any structural design lies solely with the licensed engineer or user. We are not liable for any structural failures or damages resulting from the use of calculations provided by the software.
+                </p>
+        
+                <p>
+                    <b>4. Payment and Subscriptions</b><br>
+                    All payments are processed securely by Paddle, our Merchant of Record. By subscribing, you agree to the payment terms and recurring billing of your selected plan.
+                </p>
+        
+                <p>
+                    <b>5. Refund Policy</b><br>
+                    We offer a 14-day money-back guarantee. If you are not satisfied with Auto RC, you may request a full refund within 14 days of your initial purchase by contacting our support.
+                </p>
+        
+                <p>
+                    <b>6. Updates and Support</b><br>
+                    We provide regular software updates and technical support for active subscribers to ensure compatibility and improve features.
+                </p>
+        
+                <p>
+                    <b>7. Contact Information</b><br>
+                    If you have any questions regarding these terms, please contact us at:
                     <br><br>
                     watchiraphan_bajang@hotmail.com
                 </p>
         
             </div>
         </div>
-
     
     <div id="view-loading" class="card-loading">
         <div class="loader-box">
@@ -477,7 +551,26 @@
             plansView.style.display = "block";
         
         });
-       
+        
+       const termsLink = document.getElementById("lnk-terms");
+        const termsView = document.getElementById("view-terms");
+        const backTermsBtn = document.getElementById("btn-back-terms");
+        
+        termsLink.addEventListener("click", function(e) {
+        
+            e.preventDefault();
+        
+            plansView.style.display = "none";
+            termsView.style.display = "block";
+        
+        });
+        
+        backTermsBtn.addEventListener("click", function() {
+        
+            termsView.style.display = "none";
+            plansView.style.display = "block";
+        
+        });
     </script>
 </body>
 </html>
