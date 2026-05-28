@@ -60,7 +60,6 @@
             background: rgba(17, 24, 39, 0.8);
             transform: translateY(-1px);
         }
-        /* บล็อกไม่ให้ Element ลูกแย่งรับ Event Click */
         .plan-option * { pointer-events: none; } 
         
         .plan-title { font-weight: bold; font-size: 16px; color: #ffffff; }
@@ -149,14 +148,12 @@
     </div>
 
     <script type="text/javascript">
-        // 1. ดึงค่าตัวแปรจาก URL Params ที่ยิงมาจากตัวแอปเดสก์ท็อป KMP
         const urlParams = new URLSearchParams(window.location.search);
-        let priceId = urlParams.get('price_id') || '';
+        let priceId = urlParams.get('price_id') || ''; // สำหรับ v2 ตัวนี้จะเป็นเลขไอดีสินค้าธรรมดา หรือ Product ID เปล่า ๆ
         const userId = urlParams.get('user_id') || 'review_user';
         const deviceId = urlParams.get('device_id') || 'review_device';
         const lang = urlParams.get('lang') || 'en'; 
 
-        // ระบบ Localization สลับภาษาอัตโนมัติ
         if (lang === 'thai') {
             document.getElementById('ui-title').innerText = 'อัปเกรดเป็นเวอร์ชัน Pro';
             document.getElementById('f1').innerText = 'เข้าถึงทุกโมดูลการออกแบบโครงสร้าง';
@@ -175,16 +172,18 @@
             document.getElementById('lnk-terms').innerText = 'เงื่อนไขการบริการ';
         }
 
-        // 2. 🛡️ เคลียร์บั๊ก Setup / Environment Mismatch บังคับสับท่อสัญญาณแยกต่างหากก่อนเริ่มระบบ
+        // 2. 🛠️ ถอยกลับสู่สเปก Paddle v2 แบบดั้งเดิม 100%
         if (typeof Paddle !== 'undefined') {
-            Paddle.Environment.set('sandbox'); // บังคับตัดโครงข่ายเข้า Sandbox เพื่อตัดปัญหา CORS 403
-            Paddle.Initialize({ 
-                token: 'test_4c6336ab0eb5b58c83150a6fe29' // ระบุ Client-side Token ตัวเดียวกริบตามกฎของ v3 คลีนที่สุด
+            Paddle.Environment.set('sandbox'); // เปิดโหมดทดสอบ
+            
+            // ใช้คำสั่ง Setup ของเวอร์ชัน 2 (ห้ามใช้ Initialize เด็ดขาด)
+            Paddle.Setup({ 
+                vendor: 12345 // ⚠️ เปลี่ยนเป็นตัวเลข Vendor ID (ตัวเลขล้วน) จากหน้า Paddle Sandbox ของวิศวกร
             });
         }
 
-        // ลอจิกเปิดหน้าชำระเงินอัตโนมัติ (หากตรวจพบพารามิเตอร์ราคาจากลิงก์ในตัวแอป)
-        if (priceId && priceId.trim() !== '' && priceId.startsWith('pri_')) {
+        // ลอจิกเปิดบิลอัตโนมัติเมื่อกดมาจากในแอป
+        if (priceId && priceId.trim() !== '') {
             document.getElementById('view-plans').style.display = 'none';
             document.getElementById('view-loading').style.display = 'block';
             if (lang === 'thai') { 
@@ -193,52 +192,46 @@
             setTimeout(() => { openPaddle(priceId); }, 400);
         }
 
-        // 3. ผูก Event Click เข้ากับปุ่ม UI คัสตอมของวิศวกร
+        // ผูก Event Click สไตล์คัสตอมปุ่มสวยของวิศวกร
         document.querySelectorAll('.plan-option').forEach(function(el) {
             el.addEventListener('click', function() {
-                // ⚠️ สำคัญมาก: ไอดีราคาตรงนี้ต้องเป็นไอดีที่เจนมาจากฝั่ง Sandbox Dashboard เท่านั้น
-                let selectedId = 'pri_01ksm1vzz6zg2hayb8zmenvnb4'; // ไอดีราคาจำลอง รายเดือน
+                // ⚠️ สำหรับระบบ v2 ไอดีตรงนี้จะต้องเป็นเลข "Product ID" หรือ "Plan ID" ดั้งเดิม (มักจะเป็นตัวเลขล้วน หรือไอดี v2) 
+                let selectedId = 123456; // ตัวอย่างเลขไอดีรายเดือน v2
                 if (this.id === 'plan-yearly') {
-                    selectedId = 'pri_01ksm1s4zxbadbeaxhbp3rg3fz'; // ไอดีราคาจำลอง รายปี
+                    selectedId = 789012; // ตัวอย่างเลขไอดีรายปี v2
                 }
                 openPaddle(selectedId);
             });
         });
 
-        // ปุ่ม Free Trial ทดลองใช้งาน
         const trialBtn = document.getElementById('btn-trial');
         if (trialBtn) {
             trialBtn.addEventListener('click', function() {
-                openPaddle('pri_01ksm1s4zxbadbeaxhbp3rg3fz');
+                openPaddle(789012); // ใส่ไอดีรายปี v2
             });
         }
 
-        // 4. ฟังก์ชันเปิดป๊อปอัปสั่งจ่ายเงิน ปรับโครงสร้าง Object อัปเดตล่าสุดตามกฎเหล็ก v3 Billing เปี๊ยบ ๆ
-        function openPaddle(targetPriceId) {
+        // 3. 🛠️ ปรับฟังก์ชันเปิดป๊อปอัปให้เป็น Syntax ของ v2 ดั้งเดิมแท้ๆ 
+        function openPaddle(targetProductId) {
             if (typeof Paddle === 'undefined') {
                 alert(lang === 'thai' ? "ไม่สามารถเรียกใช้งานระบบชำระเงินได้ กรุณาปิดตัวบล็อกโฆษณา" : "Checkout error. Please disable AdBlocker.");
                 return;
             }
             try {
                 Paddle.Checkout.open({
-                    settings: {
-                        displayMode: "overlay",
-                        theme: "dark", // คุมโทนแอปดีไซน์เข้มสุดหรู
-                        locale: lang === 'thai' ? 'th' : 'en'
-                    },
-                    items: [
-                        {
-                            priceId: targetPriceId, // ส่งผ่านออบเจกต์โครงสร้างมาตรฐาน v3 ป้องกัน Error 400
-                            quantity: 1
-                        }
-                    ],
-                    customData: { 
-                        user_id: userId, 
-                        device_id: deviceId 
+                    product: targetProductId, // สเปก v2 จะส่งผ่านคีย์ product ตรงๆ
+                    allowQuantity: false,
+                    displayMode: "overlay",
+                    frameInitialHeight: 450,
+                    disableLogout: true,
+                    locale: lang === 'thai' ? 'th' : 'en',
+                    passthrough: JSON.stringify({ user_id: userId, device_id: deviceId }), // ส่ง Custom Data แบบ v2
+                    successCallback: function(data) {
+                        console.log("v2 Payment Success:", data);
                     }
                 });
             } catch (e) {
-                console.error("Checkout System Error:", e);
+                console.error("v2 Checkout Error:", e);
                 alert(lang === 'thai' ? "เกิดข้อผิดพลาดในการเปิดระบบชำระเงิน" : "Error opening checkout.");
             }
         }
