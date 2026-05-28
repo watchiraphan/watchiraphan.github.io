@@ -174,12 +174,15 @@
 
         // เริ่มต้นการใช้งานเอนจิ้น Paddle
         if (typeof Paddle !== 'undefined') {
-            Paddle.Setup({ 
-                token: 'test_4c6336ab0eb5b58c83150a6fe29',
-                settings: {
-                    locale: lang === 'thai' ? 'th' : 'en'
-                }
-            });
+            if (typeof Paddle !== 'undefined') {
+                // 1. บังคับให้เอนจิ้นเปลี่ยนโหมดทำงานเป็นระบบ Paddle Billing (v3) ล่าสุด
+                Paddle.Initialize({ 
+                    token: 'test_4c6336ab0eb5b58c83150a6fe29',
+                    settings: {
+                        locale: lang === 'thai' ? 'th' : 'en'
+                    }
+                });
+            }
         }
 
         // ลอจิกเปิดบิลอัตโนมัติ (หากยิงค่าเปิดตรงมาจากในแอปพลิเคชัน)
