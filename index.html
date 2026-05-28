@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Auto RC PC - Premium Upgrade</title>
-   <script src="https://cdn.paddle.com/paddle/v2/paddle.js"></script>
+    <script src="https://cdn.paddle.com/paddle/v2/paddle.js"></script>
     <style>
         body { 
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
@@ -174,15 +174,13 @@
 
         // เริ่มต้นการใช้งานเอนจิ้น Paddle
         if (typeof Paddle !== 'undefined') {
-            if (typeof Paddle !== 'undefined') {
-                // 1. บังคับให้เอนจิ้นเปลี่ยนโหมดทำงานเป็นระบบ Paddle Billing (v3) ล่าสุด
-                Paddle.Initialize({ 
-                    token: 'test_4c6336ab0eb5b58c83150a6fe29',
-                    settings: {
-                        locale: lang === 'thai' ? 'th' : 'en'
-                    }
-                });
-            }
+            Paddle.Setup({ 
+                token: 'test_4c6336ab0eb5b58c83150a6fe29',
+                pwCustomer: {}, // บังคับให้ Setup ตัวนี้ยอมรับพารามิเตอร์แบบโครงสร้าง v3
+                settings: {
+                    locale: lang === 'thai' ? 'th' : 'en'
+                }
+            });
         }
 
         // ลอจิกเปิดบิลอัตโนมัติ (หากยิงค่าเปิดตรงมาจากในแอปพลิเคชัน)
