@@ -196,79 +196,45 @@
             document.getElementById('lnk-terms').innerText = 'เงื่อนไขการบริการ';
         }
 
+        // 📌 ยืนยันรันโหมด Sandbox บนสคริปต์หลัก
         Paddle.Environment.set("sandbox");
         
+        // 📌 เรียก Initialize แบบ v3 บนตัวสคริปต์หลัก ดักจับ Event ปิดตัวโหลดดิ้งอย่างสมบูรณ์
         Paddle.Initialize({
-            token: 'test_4c6336ab0eb5b58c83150a6fe29',
+            token: 'test_4c6336ab0eb5b58c83150a6fe29', 
             eventCallback: function(data) {
-                console.log("=== PADDLE DEBUG EVENT TRIGGERED ===", data.event, data);
-
-                // 📌 จุดสำคัญ: เพิ่มกลุ่ม Event ตระกูล closed เข้ามาเพื่อสั่งปิดหน้าโหลดเมื่อผู้ใช้ยกเลิกหรือปิดหน้าต่างชำระเงิน
-                const targetCloseEvents = [
-                    'checkout.loaded', 'Checkout.Loaded',
-                    'checkout.rendering', 'Checkout.Rendering',
-                    'checkout.displayed', 'Checkout.Displayed',
-                    'checkout.opened', 'Checkout.Opened',
-                    'checkout.closed', 'Checkout.Closed' 
+                console.log("=== PADDLE EVENT TRIGGERED ===", data.event);
+                
+                // ถ้ายูสเซอร์กดยกเลิก ปิดหน้าต่าง หรือหน้าต่างเปิดสำเร็จ -> สั่งปิดตัวโหลดดิ้งทันที!
+                const closeTriggers = [
+                    'checkout.loaded', 'checkout.displayed', 'checkout.closed', 'Checkout.Closed'
                 ];
-
-                if (targetCloseEvents.includes(data.event)) {
-                    console.log(`🎯 พบเจอ Event สำหรับสั่งปิดหน้าโหลด: ${data.event}`);
+                if (closeTriggers.includes(data.event)) {
                     document.getElementById('view-loading').style.display = 'none';
                 }
             }
         });
-         console.log("Paddle",Paddle)
-        if (typeof Paddle !== 'undefined') {
-            try {
-                Paddle.Price.preview({
-                    items: [
-                        { priceId: ID_MONTHLY, quantity: 1 },
-                        { priceId: ID_YEARLY, quantity: 1 }
-                    ]
-                }).then(function(result) {
-                    console.log("=== 1. PADDLE v3 PRICE PREVIEW DATA ===", result);
-                    if (result && result.details && result.details.lineItems) {
-                        result.details.lineItems.forEach(function(item) {
-                            console.log(`[V3 Method] ไอดีราคา: ${item.priceId} -> ราคาสุทธิ: ${item.totals.total}`);
-                            
-                            if (item.priceId === ID_MONTHLY) {
-                                document.getElementById('p-price-monthly').innerText = item.formattedTotals.total;
-                            } else if (item.priceId === ID_YEARLY) {
-                                document.getElementById('p-price-yearly').innerText = item.formattedTotals.total;
-                            }
-                        });
+
+        // 📌 ยิงฟังก์ชันพรีวิวราคาแบบไม่มี try-catch ครอบตามสั่ง ถ้าพังให้มันฟ้องในคอนโซลตรง ๆ
+        Paddle.Price.preview({
+            items: [
+                { priceId: ID_MONTHLY, quantity: 1 },
+                { priceId: ID_YEARLY, quantity: 1 }
+            ]
+        }).then(function(result) {
+            console.log("=== PRICE DATA SUCCESS ===", result);
+            if (result && result.details && result.details.lineItems) {
+                result.details.lineItems.forEach(function(item) {
+                    if (item.priceId === ID_MONTHLY) {
+                        document.getElementById('p-price-monthly').innerText = item.formattedTotals.total;
+                    } else if (item.priceId === ID_YEARLY) {
+                        document.getElementById('p-price-yearly').innerText = item.formattedTotals.total;
                     }
-                }).catch(function(err) {
-                    console.warn("เกิดข้อผิดพลาดในการเรียก Preview ราคา (V3) กำลังรันแผนสำรอง...", err);
-                    runFallbackPriceFetch();
                 });
-            } catch(err) {
-                console.warn("ไม่สามารถรันคำสั่ง Paddle.Price.preview ได้ สลับไปใช้แผนสำรองทันที...", err);
-                runFallbackPriceFetch();
             }
-        }
+        });
 
-        function runFallbackPriceFetch() {
-           
-            fetch(`https://sandbox-checkout.paddle.com/api/2.0/prices?product_ids=${ID_MONTHLY},${ID_YEARLY}`)
-            .then(res => res.json())
-            .then(resData => {
-                console.log("=== 2. PADDLE FETCH API FALLBACK DATA ===", resData);
-                if (resData && resData.response && resData.response.products) {
-                    resData.response.products.forEach(function(prod) {
-                        console.log(`[Fetch] สินค้าไอดี: ${prod.product_id} -> ราคาคีย์ย่อย:`, prod.recurring_price);
-                        if (prod.product_id.toString() === ID_MONTHLY) {
-                            document.getElementById('p-price-monthly').innerText = prod.recurring_price;
-                            
-                        } else if (prod.product_id.toString() === ID_YEARLY) {
-                            document.getElementById('p-price-yearly').innerText = prod.recurring_price;
-                        }
-                    });
-                }
-            }).catch(fetchErr => console.error("Fetch ราคาล้มเหลวโดยสิ้นเชิง:", fetchErr));
-        }
-
+        // ลอจิกเปิดบิลอัตโนมัติเมื่อส่งราคามาจากตัวแอปเดสก์ท็อป
         if (priceId && priceId.trim() !== '' && priceId.startsWith('pri_')) {
             document.getElementById('view-loading').style.display = 'flex';
             setTimeout(() => { 
@@ -294,47 +260,22 @@
         }
           
         function openCheckout(items) {
-            if (typeof Paddle === 'undefined') {
-                alert(lang === 'thai' ? "ไม่สามารถเรียกใช้งานระบบชำระเงินได้ กรุณาปิดตัวบล็อกโฆษณา" : "Checkout error. Please disable AdBlocker.");
-                return;
-            }
-            try {
-                document.getElementById('view-loading').style.display = 'flex';
+            document.getElementById('view-loading').style.display = 'flex';
 
-                console.log("=== INITIATING CHECKOUT ===", {
-                    items: items,
-                    lang: lang,
-                    userId: userId,
-                    deviceId: deviceId,
-                    email: emailUser
-                });
-
-                let checkoutOptions = {
-                    items: items,
-                    settings: {
-                        displayMode: "overlay",
-                        theme: "dark",
-                        locale: lang === 'thai' ? 'th' : 'en'
-                    },
-                    customData: { 
-                        user_id: userId, 
-                        device_id: deviceId 
-                    }
-                };
-
-                if (emailUser && emailUser.trim() !== '') {
-                    checkoutOptions.customer = {
-                        email: emailUser
-                    };
-                }
-
-                Paddle.Checkout.open(checkoutOptions);
-              
-            } catch (e) {
-                console.error("Checkout System Error:", e);
-                document.getElementById('view-loading').style.display = 'none';
-                alert(lang === 'thai' ? "เกิดข้อผิดพลาดในการเปิดระบบชำระเงิน" : "Error opening checkout.");
-            }
+            // โครงสร้างคำสั่งเปิดบิลของระบบ v3 Billing ตัวจริง
+             Paddle.Checkout.open({
+                items: items,
+                settings: {
+                    displayMode: "overlay",
+                    theme: "dark",
+                    locale: lang === 'thai' ? 'th' : 'en'
+                },
+                customData: { 
+                    user_id: userId, 
+                    device_id: deviceId 
+                },
+                customer: emailUser && emailUser.trim() !== '' ? { email: emailUser } : undefined
+            });
         }
     </script>
 </body>
