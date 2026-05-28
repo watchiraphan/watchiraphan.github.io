@@ -88,10 +88,30 @@
         .footer-links { display: flex; justify-content: space-evenly; margin-top: 30px; font-size: 11px; }
         .footer-links a { color: #64748b; text-decoration: underline; cursor: pointer; }
 
+        /* 📌 ปรับให้เป็น Overlay ลอยทับหน้าจอโปร่งแสง เพื่อไม่ให้หน้าหลักหายไป */
         .card-loading {
-            background: rgba(17, 17, 17, 0.6); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-            padding: 30px; border-radius: 16px; border: 1px solid rgba(85, 255, 255, 0.2); box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5); 
-            max-width: 450px; width: 90%; text-align: center; display: none; margin-left: 50px; 
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.6); 
+            backdrop-filter: blur(8px); 
+            -webkit-backdrop-filter: blur(8px);
+            display: none; 
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+        }
+        .loader-box {
+            background: rgba(17, 17, 17, 0.85);
+            padding: 35px;
+            border-radius: 16px;
+            border: 1px solid rgba(85, 255, 255, 0.2);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.7);
+            max-width: 380px;
+            width: 85%;
+            text-align: center;
         }
         .loader { border: 4px solid #222222; border-top: 4px solid #55FFFF; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 0 auto 20px; }
         .loading-text { color: #cbd5e1; font-size: 16px; line-height: 1.6; }
@@ -99,7 +119,7 @@
 
         @media (max-width: 600px) {
             body { justify-content: center; }
-            .card-plans, .card-loading { margin-left: 0; }
+            .card-plans { margin-left: 0; }
         }
     </style>
 </head>
@@ -140,10 +160,12 @@
     </div>
 
     <div id="view-loading" class="card-loading">
-        <div class="loader"></div>
-        <div class="loading-text">
-            <b style="color: white; font-size: 20px;">Auto RC PC</b><br><br>
-            <span id="load-msg">Connecting to Paddle's secure payment system...</span>
+        <div class="loader-box">
+            <div class="loader"></div>
+            <div class="loading-text">
+                <b style="color: white; font-size: 20px;">Auto RC PC</b><br><br>
+                <span id="load-msg">Connecting to Paddle's secure payment system...</span>
+            </div>
         </div>
     </div>
 
@@ -152,7 +174,7 @@
         let priceId = urlParams.get('price_id') || '';
         const userId = urlParams.get('user_id') || 'review_user';
         const deviceId = urlParams.get('device_id') || 'review_device';
-        const emailUser = urlParams.get('email') || ''; // 📌 ดึงค่าอีเมลที่ส่งมาจากลิงก์
+        const emailUser = urlParams.get('email') || ''; 
         const lang = urlParams.get('lang') || 'en'; 
 
         if (lang === 'thai') {
@@ -173,7 +195,6 @@
             document.getElementById('lnk-terms').innerText = 'เงื่อนไขการบริการ';
         }
 
-        // ✅ คงโครงสร้างการ Initialize เดิมของวิศวกรไว้เป๊ะๆ ห้ามบิดพริ้ว
         Paddle.Environment.set("sandbox");
         Paddle.Initialize({
             token: 'test_4c6336ab0eb5b58c83150a6fe29'
@@ -181,8 +202,8 @@
 
         // ลอจิกเปิดบิลอัตโนมัติเมื่อยิงลิงก์มาจากตัวแอป KMP เดสก์ท็อป
         if (priceId && priceId.trim() !== '' && priceId.startsWith('pri_')) {
-            document.getElementById('view-plans').style.display = 'none';
-            document.getElementById('view-loading').style.display = 'block';
+            // 📌 จุดที่เปลี่ยน: เปลี่ยนจากซ่อนหน้าหลัก เป็นสั่งให้หน้าโหลดเปิดแบบครอบหน้าจอ (flex)
+            document.getElementById('view-loading').style.display = 'flex';
             if (lang === 'thai') { 
                 document.getElementById('load-msg').innerText = "กำลังเชื่อมต่อกับระบบชำระเงิน Paddle ปลอดภัย..."; 
             }
@@ -191,12 +212,11 @@
             }, 400);
         }
 
-        // ดัก Event ปุ่มคลิกเลือกแพ็กเกจบนหน้าจอ
         document.querySelectorAll('.plan-option').forEach(function(el) {
             el.addEventListener('click', function() {
-                let selectedId = 'pri_01ksm1vzz6zg2hayb8zmenvnb4'; // รายเดือน Sandbox
+                let selectedId = 'pri_01ksm1vzz6zg2hayb8zmenvnb4'; 
                 if (this.id === 'plan-yearly') {
-                    selectedId = 'pri_01ksm1s4zxbadbeaxhbp3rg3fz'; // รายปี Sandbox
+                    selectedId = 'pri_01ksm1s4zxbadbeaxhbp3rg3fz'; 
                 }
                 openCheckout([{ priceId: selectedId, quantity: 1 }]);
             });
@@ -209,7 +229,6 @@
             });
         }
           
-        // ✅ ฟังก์ชันเปิดหน้าต่างแบบคู่มือเป๊ะๆ เพิ่มเติมแค่คีย์ข้อมูลลูกค้า
         function openCheckout(items) {
             if (typeof Paddle === 'undefined') {
                 alert(lang === 'thai' ? "ไม่สามารถเรียกใช้งานระบบชำระเงินได้ กรุณาปิดตัวบล็อกโฆษณา" : "Checkout error. Please disable AdBlocker.");
@@ -237,17 +256,25 @@
                     }
                 };
 
-                // 📌 จุดที่เพิ่ม: แทรกข้อมูลอีเมลเข้าไปในพารามิเตอร์ของระบบเปิดบิลเดิม
                 if (emailUser && emailUser.trim() !== '') {
                     checkoutOptions.customer = {
                         email: emailUser
                     };
                 }
 
+                // 📌 จุดที่เพิ่มเติม: แนบ Event ดักจับเพื่อปิดหน้าต่างโหลดเมื่อหน้าชำระเงินดึงข้อมูลสำเร็จและพร้อมทำงานแล้ว
+                checkoutOptions.settings.eventCallback = function(data) {
+                    if (data.event === 'Checkout.Loaded' || data.event === 'checkout.loaded') {
+                        document.getElementById('view-loading').style.display = 'none';
+                    }
+                };
+
                 Paddle.Checkout.open(checkoutOptions);
               
             } catch (e) {
                 console.error("Checkout System Error:", e);
+                // หากเกิดข้อผิดพลาด ให้เอาหน้าโหลดออกเพื่อให้ผู้ใช้ทำงานต่อได้
+                document.getElementById('view-loading').style.display = 'none';
                 alert(lang === 'thai' ? "เกิดข้อผิดพลาดในการเปิดระบบชำระเงิน" : "Error opening checkout.");
             }
         }
