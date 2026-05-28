@@ -172,14 +172,10 @@
             document.getElementById('lnk-terms').innerText = 'เงื่อนไขการบริการ';
         }
 
-        // เริ่มต้นการใช้งานเอนจิ้น Paddle
+        // 1. ลงทะเบียนความปลอดภัยฝั่ง Client-Side (แก้ไข: ลบก้อน settings ออกเพื่อแก้บั๊กอย่างเด็ดขาด)
         if (typeof Paddle !== 'undefined') {
             Paddle.Setup({ 
-                token: 'test_4c6336ab0eb5b58c83150a6fe29',
-                pwCustomer: {}, // บังคับให้ Setup ตัวนี้ยอมรับพารามิเตอร์แบบโครงสร้าง v3
-                settings: {
-                    locale: lang === 'thai' ? 'th' : 'en'
-                }
+                token: 'test_4c6336ab0eb5b58c83150a6fe29'
             });
         }
 
@@ -212,7 +208,7 @@
             });
         }
 
-        // ฟังก์ชันหลักในการเปิดหน้าต่างป๊อปอัปชำระเงิน (Paddle Checkout)
+        // 2. ฟังก์ชันหลักในการเปิดหน้าต่างป๊อปอัปชำระเงิน (รองรับโครงสร้าง Paddle Billing v3 เต็มพิกัด)
         function openPaddle(targetPriceId) {
             if (typeof Paddle === 'undefined') {
                 alert(lang === 'thai' ? "ไม่สามารถเรียกใช้งานระบบชำระเงินได้ กรุณาปิดตัวบล็อกโฆษณา (AdBlocker) แล้วลองใหม่อีกครั้ง" : "Checkout error. Please disable AdBlocker and try again.");
@@ -222,6 +218,7 @@
                 Paddle.Checkout.open({
                     settings: { 
                         displayMode: "overlay",
+                        theme: "dark",
                         locale: lang === 'thai' ? 'th' : 'en'
                     },
                     items: [{ priceId: targetPriceId, quantity: 1 }],
