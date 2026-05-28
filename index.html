@@ -211,25 +211,19 @@
         // ฟังก์ชันส่งกระสุนข้อมูลเข้าหน้าต่างเปิด Checkout
         function openPaddle(targetPriceId) {
             if (typeof Paddle === 'undefined') {
-                alert(lang === 'thai' ? "ไม่สามารถเรียกใช้งานระบบชำระเงินได้ กรุณาปิดตัวบล็อกโฆษณา" : "Checkout error. Please disable AdBlocker.");
+                alert(lang === 'thai' ? "ไม่สามารถเรียกใช้งานระบบชำระเงินได้" : "Checkout error.");
                 return;
             }
             try {
                 Paddle.Checkout.open({
-                    settings: {
-                        displayMode: "overlay",
-                        theme: "dark",
-                        locale: lang === 'thai' ? 'th' : 'en'
-                    },
-                    items: [
-                        {
-                            priceId: targetPriceId,
-                            quantity: 1
-                        }
-                    ],
-                    customData: { 
-                        user_id: userId, 
-                        device_id: deviceId 
+                    // ย้ายพารามิเตอร์ออกมาส่งตรงตามสเปก Core API เพื่อป้องกันข้อผิดพลาด 400
+                    product: targetPriceId, 
+                    quantity: 1,
+                    passthrough: JSON.stringify({ user_id: userId, device_id: deviceId }),
+                    locale: lang === 'thai' ? 'th' : 'en',
+                    theme: "dark",
+                    successCallback: function(data) {
+                        console.log("Success:", data);
                     }
                 });
             } catch (e) {
