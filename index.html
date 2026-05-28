@@ -173,12 +173,12 @@
         }
 
         // ✅ ล็อกโครงสร้างการ Initialize ตามคู่มือที่วิศวกรส่งมาเป๊ะๆ ห้ามบิดพริ้ว
-        if (typeof Paddle !== 'undefined') {
+        //if (typeof Paddle !== 'undefined') {
             Paddle.Environment.set("sandbox");
             Paddle.Initialize({
                 token: 'test_4c6336ab0eb5b58c83150a6fe29' // ใส่ Client-side Token ฝั่ง Sandbox ของวิศวกร
             });
-        }
+        //}
 
         // ลอจิกเปิดบิลอัตโนมัติเมื่อยิงลิงก์มาจากตัวแอป KMP เดสก์ท็อป
         if (priceId && priceId.trim() !== '' && priceId.startsWith('pri_')) {
@@ -217,6 +217,12 @@
                 return;
             }
             //try {
+                console.log("Payment Debug Data:", {
+                    items: items,
+                    lang: lang,
+                    userId: userId,
+                    deviceId: deviceId
+                });
                 Paddle.Checkout.open({
                     items: items,
                     settings: {
