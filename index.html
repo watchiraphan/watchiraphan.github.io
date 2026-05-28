@@ -220,28 +220,15 @@
               quantity: 1
             }
           ];
-        let customer = {
-            email: "sam@example.com",
-            address: {
-              countryCode: "US",
-              postalCode: "10021"
-            }
-          }
-        
-          // open checkout
-          function openCheckout2(items){
-            Paddle.Checkout.open({
-              items: items,
-              customer: customer
-            });
-          }
+    
+          
         // ✅ ฟังก์ชันเปิดหน้าต่างแบบคู่มือเป๊ะๆ รับตัวแปรอาร์เรย์ items ไปสั่งเปิดโดยตรง 
         function openCheckout(items) {
             if (typeof Paddle === 'undefined') {
                 alert(lang === 'thai' ? "ไม่สามารถเรียกใช้งานระบบชำระเงินได้ กรุณาปิดตัวบล็อกโฆษณา" : "Checkout error. Please disable AdBlocker.");
                 return;
             }
-            //try {
+            try {
                 console.log("Payment Debug Data:", {
                     items: items,
                     lang: lang,
@@ -261,10 +248,10 @@
                     }
                 });
               
-            /*} catch (e) {
+            } catch (e) {
                 console.error("Checkout System Error:", e);
                 alert(lang === 'thai' ? "เกิดข้อผิดพลาดในการเปิดระบบชำระเงิน" : "Error opening checkout.");
-            }*/
+            }
         }
     </script>
 </body>
