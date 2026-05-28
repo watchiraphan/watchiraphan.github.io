@@ -203,11 +203,13 @@
             eventCallback: function(data) {
                 console.log("=== PADDLE DEBUG EVENT TRIGGERED ===", data.event, data);
 
+                // 📌 จุดสำคัญ: เพิ่มกลุ่ม Event ตระกูล closed เข้ามาเพื่อสั่งปิดหน้าโหลดเมื่อผู้ใช้ยกเลิกหรือปิดหน้าต่างชำระเงิน
                 const targetCloseEvents = [
                     'checkout.loaded', 'Checkout.Loaded',
                     'checkout.rendering', 'Checkout.Rendering',
                     'checkout.displayed', 'Checkout.Displayed',
-                    'checkout.opened', 'Checkout.Opened'
+                    'checkout.opened', 'Checkout.Opened',
+                    'checkout.closed', 'Checkout.Closed' 
                 ];
 
                 if (targetCloseEvents.includes(data.event)) {
@@ -217,10 +219,8 @@
             }
         });
 
-        // 📌 แก้ไขจุดบัก: เปลี่ยนโครงสร้างตัวแปรเป็นเมธอดดึงราคาแท้จริงของระบบ Paddle v3
         if (typeof Paddle !== 'undefined') {
             try {
-                // ปรับมาใช้คำสั่งมาตรฐานของรุ่นใหม่ (v3 Native) ในการพรีวิวราคาของรายการไอเทม
                 Paddle.Price.preview({
                     items: [
                         { priceId: ID_MONTHLY, quantity: 1 },
@@ -232,7 +232,6 @@
                         result.details.lineItems.forEach(function(item) {
                             console.log(`[V3 Method] ไอดีราคา: ${item.priceId} -> ราคาสุทธิ: ${item.totals.total}`);
                             
-                            // ดึงค่าผลรวมรวมภาษีที่ฟอร์แมตสัญลักษณ์เงินเรียบร้อยแล้ว (เช่น ฿550.00 หรือ $15.99) มาโชว์
                             if (item.priceId === ID_MONTHLY) {
                                 document.getElementById('p-price-monthly').innerText = item.formattedTotals.total;
                             } else if (item.priceId === ID_YEARLY) {
@@ -250,7 +249,6 @@
             }
         }
 
-        // ฟังก์ชันแผนสำรอง: ดึงราคาตรง ๆ ผ่าน API หลังบ้านกรณี SDK มีปัญหา
         function runFallbackPriceFetch() {
             fetch(`https://sandbox-checkout.paddle.com/api/2.0/prices?product_ids=${ID_MONTHLY},${ID_YEARLY}`)
             .then(res => res.json())
@@ -269,7 +267,6 @@
             }).catch(fetchErr => console.error("Fetch ราคาล้มเหลวโดยสิ้นเชิง:", fetchErr));
         }
 
-        // ลอจิกเปิดบิลอัตโนมัติเมื่อยิงลิงก์มาจากตัวแอปเดสก์ท็อป
         if (priceId && priceId.trim() !== '' && priceId.startsWith('pri_')) {
             document.getElementById('view-loading').style.display = 'flex';
             setTimeout(() => { 
