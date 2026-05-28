@@ -88,7 +88,6 @@
         .footer-links { display: flex; justify-content: space-evenly; margin-top: 30px; font-size: 11px; }
         .footer-links a { color: #64748b; text-decoration: underline; cursor: pointer; }
 
-        /* 📌 ปรับให้เป็น Overlay ลอยทับหน้าจอโปร่งแสง เพื่อไม่ให้หน้าหลักหายไป */
         .card-loading {
             position: fixed;
             top: 0;
@@ -138,7 +137,7 @@
                 <div class="plan-title" id="t-monthly">Monthly Plan</div>
                 <div class="plan-desc" id="d-monthly">Cancel anytime</div>
             </div>
-            <div class="plan-price">15.99 $</div>
+            <div class="plan-price" id="p-price-monthly">15.99 $</div>
         </div>
 
         <div class="plan-option" id="plan-yearly">
@@ -146,7 +145,7 @@
                 <div class="plan-title"><span id="t-yearly">Yearly Plan</span><span class="save-badge" id="b-yearly">Save 33%</span></div>
                 <div class="plan-desc" id="d-yearly">Best Value</div>
             </div>
-            <div class="plan-price">129.99 $</div>
+            <div class="plan-price" id="p-price-yearly">129.99 $</div>
         </div>
 
         <button class="btn-trial" id="btn-trial">Start 7-Day Free Trial</button>
@@ -170,6 +169,10 @@
     </div>
 
     <script type="text/javascript">
+        // ล็อกไอดีราคาหลักให้เรียกใช้งานได้ง่ายขึ้นในหลาย ๆ จุด
+        const ID_MONTHLY = 'pri_01ksm1vzz6zg2hayb8zmenvnb4';
+        const ID_YEARLY = 'pri_01ksm1s4zxbadbeaxhbp3rg3fz';
+
         const urlParams = new URLSearchParams(window.location.search);
         let priceId = urlParams.get('price_id') || '';
         const userId = urlParams.get('user_id') || 'review_user';
@@ -200,9 +203,24 @@
             token: 'test_4c6336ab0eb5b58c83150a6fe29'
         });
 
+        // 📌 จุดที่เพิ่ม: เรียกดึงราคาแบบเรียลไทม์จากระบบ Paddle ทันทีเมื่อโหลดหน้าเว็บสำเร็จ
+        if (typeof Paddle !== 'undefined') {
+            Paddle.Product.Prices([ID_MONTHLY, ID_YEARLY], function(prices) {
+                if (prices && prices.products) {
+                    prices.products.forEach(function(prod) {
+                        // ดึงยอดสุทธิรวมภาษี (gross) พร้อมสัญลักษณ์สกุลเงินมาโชว์
+                        if (prod.priceId === ID_MONTHLY) {
+                            document.getElementById('p-price-monthly').innerText = prod.price.gross;
+                        } else if (prod.priceId === ID_YEARLY) {
+                            document.getElementById('p-price-yearly').innerText = prod.price.gross;
+                        }
+                    });
+                }
+            });
+        }
+
         // ลอจิกเปิดบิลอัตโนมัติเมื่อยิงลิงก์มาจากตัวแอป KMP เดสก์ท็อป
         if (priceId && priceId.trim() !== '' && priceId.startsWith('pri_')) {
-            // 📌 จุดที่เปลี่ยน: เปลี่ยนจากซ่อนหน้าหลัก เป็นสั่งให้หน้าโหลดเปิดแบบครอบหน้าจอ (flex)
             document.getElementById('view-loading').style.display = 'flex';
             if (lang === 'thai') { 
                 document.getElementById('load-msg').innerText = "กำลังเชื่อมต่อกับระบบชำระเงิน Paddle ปลอดภัย..."; 
@@ -214,9 +232,9 @@
 
         document.querySelectorAll('.plan-option').forEach(function(el) {
             el.addEventListener('click', function() {
-                let selectedId = 'pri_01ksm1vzz6zg2hayb8zmenvnb4'; 
+                let selectedId = ID_MONTHLY; 
                 if (this.id === 'plan-yearly') {
-                    selectedId = 'pri_01ksm1s4zxbadbeaxhbp3rg3fz'; 
+                    selectedId = ID_YEARLY; 
                 }
                 openCheckout([{ priceId: selectedId, quantity: 1 }]);
             });
@@ -225,7 +243,7 @@
         const trialBtn = document.getElementById('btn-trial');
         if (trialBtn) {
             trialBtn.addEventListener('click', function() {
-                openCheckout([{ priceId: 'pri_01ksm1s4zxbadbeaxhbp3rg3fz', quantity: 1 }]);
+                openCheckout([{ priceId: ID_YEARLY, quantity: 1 }]);
             });
         }
           
@@ -262,18 +280,14 @@
                     };
                 }
 
-                // 📌 จุดที่เพิ่มเติม: แนบ Event ดักจับเพื่อปิดหน้าต่างโหลดเมื่อหน้าชำระเงินดึงข้อมูลสำเร็จและพร้อมทำงานแล้ว
-                checkoutOptions.settings.eventCallback = function(data) {
-                    if (data.event === 'Checkout.Loaded' || data.event === 'checkout.loaded') {
-                        document.getElementById('view-loading').style.display = 'none';
-                    }
-                };
-
+                // สั่งเปิดหน้าต่างชำระเงิน
                 Paddle.Checkout.open(checkoutOptions);
+                
+                // 📌 จุดแก้ไขลอจิก: สั่งปิดหน้าต่างโหลดทันทีหลังจากบิลถูกกระตุ้นให้เริ่มแสดงผล (Overlay ขึ้นซ้อนแล้ว)
+                document.getElementById('view-loading').style.display = 'none';
               
             } catch (e) {
                 console.error("Checkout System Error:", e);
-                // หากเกิดข้อผิดพลาด ให้เอาหน้าโหลดออกเพื่อให้ผู้ใช้ทำงานต่อได้
                 document.getElementById('view-loading').style.display = 'none';
                 alert(lang === 'thai' ? "เกิดข้อผิดพลาดในการเปิดระบบชำระเงิน" : "Error opening checkout.");
             }
