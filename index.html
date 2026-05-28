@@ -1,275 +1,341 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Auto RC PC - Premium Upgrade</title>
-    <script src="https://cdn.paddle.com/paddle/v2/paddle.js"></script>
-    <style>
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
-            background-color: #000000; 
-            background-image: url('pic_autorc.png'); 
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            background-attachment: fixed;
-            color: #CAF8F4; 
-            margin: 0; 
-            display: flex; 
-            justify-content: flex-start; 
-            align-items: center; 
-            min-height: 100vh; 
-        }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auto RC PC - Premium Upgrade</title>
+    <script src="https://cdn.paddle.com/paddle/v2/paddle.js"></script>
+    <style>
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+            background-color: #000000; 
+            background-image: url('pic_autorc.png'); 
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            color: #CAF8F4; 
+            margin: 0; 
+            display: flex; 
+            justify-content: flex-start; 
+            align-items: center; 
+            min-height: 100vh; 
+        }
 
-        .card-plans { 
-            background: rgba(17, 17, 17, 0.6); 
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            padding: 30px; 
-            border-radius: 16px; 
-            border: 1px solid rgba(85, 255, 255, 0.2); 
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5); 
-            max-width: 450px; 
-            width: 90%; 
-            text-align: center;
-            display: block; 
-            margin-left: 50px; 
-        }
+        .card-plans { 
+            background: rgba(17, 17, 17, 0.6); 
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 30px; 
+            border-radius: 16px; 
+            border: 1px solid rgba(85, 255, 255, 0.2); 
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5); 
+            max-width: 450px; 
+            width: 90%; 
+            text-align: center;
+            display: block; 
+            margin-left: 50px; 
+        }
 
-        h1 { color: #55FFFF; margin-bottom: 20px; font-size: 24px; font-weight: bold; }
-        .features-list { text-align: left; margin: 20px auto; max-width: 380px; }
-        .feature-item { display: flex; align-items: center; margin-bottom: 12px; font-size: 14px; color: #CAF8F4; }
-        .feature-icon { color: #55FFFF; margin-right: 12px; font-size: 20px; flex-shrink: 0; }
+        h1 { color: #55FFFF; margin-bottom: 20px; font-size: 24px; font-weight: bold; }
+        .features-list { text-align: left; margin: 20px auto; max-width: 380px; }
+        .feature-item { display: flex; align-items: center; margin-bottom: 12px; font-size: 14px; color: #CAF8F4; }
+        .feature-icon { color: #55FFFF; margin-right: 12px; font-size: 20px; flex-shrink: 0; }
 
-        .plan-option {
-            background: rgba(26, 26, 26, 0.7); 
-            border: 2px solid #333333; 
-            border-radius: 12px; 
-            padding: 18px;
-            margin-bottom: 14px; 
-            text-align: left; 
-            cursor: pointer; 
-            transition: all 0.2s ease;
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center;
-        }
-        .plan-option:hover {
-            border-color: #55FFFF;
-            background: rgba(17, 24, 39, 0.8);
-            transform: translateY(-1px);
-        }
-        .plan-option * { pointer-events: none; } 
-        
-        .plan-title { font-weight: bold; font-size: 16px; color: #ffffff; }
-        .plan-desc { font-size: 12px; color: #94a3b8; margin-top: 4px; }
-        .save-badge { background: #22c55e; color: #ffffff; font-size: 11px; padding: 2px 6px; border-radius: 4px; margin-left: 8px; }
-        .plan-price { font-size: 20px; font-weight: bold; color: #55FFFF; }
+        .plan-option {
+            background: rgba(26, 26, 26, 0.7); 
+            border: 2px solid #333333; 
+            border-radius: 12px; 
+            padding: 18px;
+            margin-bottom: 14px; 
+            text-align: left; 
+            cursor: pointer; 
+            transition: all 0.2s ease;
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+        }
+        .plan-option:hover {
+            border-color: #55FFFF;
+            background: rgba(17, 24, 39, 0.8);
+            transform: translateY(-1px);
+        }
+        .plan-option * { pointer-events: none; } 
+        
+        .plan-title { font-weight: bold; font-size: 16px; color: #ffffff; }
+        .plan-desc { font-size: 12px; color: #94a3b8; margin-top: 4px; }
+        .save-badge { background: #22c55e; color: #ffffff; font-size: 11px; padding: 2px 6px; border-radius: 4px; margin-left: 8px; }
+        .plan-price { font-size: 20px; font-weight: bold; color: #55FFFF; }
 
-        .btn-trial { 
-            background: transparent; 
-            color: #55FFFF; 
-            border: 1px solid #55FFFF; 
-            border-radius: 12px; 
-            width: 100%; 
-            padding: 14px; 
-            font-size: 15px; 
-            font-weight: bold; 
-            cursor: pointer; 
-            margin-top: 10px; 
-            transition: all 0.2s ease;
-        }
-        .btn-trial:hover { 
-            background: rgba(85, 255, 255, 0.1); 
-            transform: translateY(-1px);
-        }
+        .btn-trial { 
+            background: transparent; 
+            color: #55FFFF; 
+            border: 1px solid #55FFFF; 
+            border-radius: 12px; 
+            width: 100%; 
+            padding: 14px; 
+            font-size: 15px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            margin-top: 10px; 
+            transition: all 0.2s ease;
+        }
+        .btn-trial:hover { 
+            background: rgba(85, 255, 255, 0.1); 
+            transform: translateY(-1px);
+        }
 
-        .footer-links { display: flex; justify-content: space-evenly; margin-top: 30px; font-size: 11px; }
-        .footer-links a { color: #64748b; text-decoration: underline; cursor: pointer; }
+        .footer-links { display: flex; justify-content: space-evenly; margin-top: 30px; font-size: 11px; }
+        .footer-links a { color: #64748b; text-decoration: underline; cursor: pointer; }
 
-        .card-loading {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: rgba(0, 0, 0, 0.6); 
-            backdrop-filter: blur(8px); 
-            -webkit-backdrop-filter: blur(8px);
-            display: none; 
-            z-index: 9999;
-            justify-content: center;
-            align-items: center;
-        }
-        .loader-box {
-            background: rgba(17, 17, 17, 0.85);
-            padding: 35px;
-            border-radius: 16px;
-            border: 1px solid rgba(85, 255, 255, 0.2);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.7);
-            max-width: 380px;
-            width: 85%;
-            text-align: center;
-        }
-        .loader { border: 4px solid #222222; border-top: 4px solid #55FFFF; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 0 auto 20px; }
-        .loading-text { color: #cbd5e1; font-size: 16px; line-height: 1.6; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .card-loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.6); 
+            backdrop-filter: blur(8px); 
+            -webkit-backdrop-filter: blur(8px);
+            display: none; 
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+        }
+        .loader-box {
+            background: rgba(17, 17, 17, 0.85);
+            padding: 35px;
+            border-radius: 16px;
+            border: 1px solid rgba(85, 255, 255, 0.2);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.7);
+            max-width: 380px;
+            width: 85%;
+            text-align: center;
+        }
+        .loader { border: 4px solid #222222; border-top: 4px solid #55FFFF; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 0 auto 20px; }
+        .loading-text { color: #cbd5e1; font-size: 16px; line-height: 1.6; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        @media (max-width: 600px) {
-            body { justify-content: center; }
-            .card-plans { margin-left: 0; }
-        }
-    </style>
+        @media (max-width: 600px) {
+            body { justify-content: center; }
+            .card-plans { margin-left: 0; }
+        }
+    </style>
 </head>
 <body>
 
-    <div id="view-plans" class="card-plans">
-        <h1 id="ui-title">Upgrade to Pro</h1>
-        <div class="features-list">
-            <div class="feature-item"><span class="feature-icon">🔓</span><span id="f1">Full access to all Structural Modules</span></div>
-            <div class="feature-item"><span class="feature-icon">📄</span><span id="f2">Export Calculation, Bar Cut List, BOQ Report</span></div>
-            <div class="feature-item"><span class="feature-icon">🏢</span><span id="f3">Export Structural Model and CAD Drawing</span></div>
-        </div>
+    <div id="view-plans" class="card-plans">
+        <h1 id="ui-title">Upgrade to Pro</h1>
+        <div class="features-list">
+            <div class="feature-item"><span class="feature-icon">🔓</span><span id="f1">Full access to all Structural Modules</span></div>
+            <div class="feature-item"><span class="feature-icon">📄</span><span id="f2">Export Calculation, Bar Cut List, BOQ Report</span></div>
+            <div class="feature-item"><span class="feature-icon">🏢</span><span id="f3">Export Structural Model and CAD Drawing</span></div>
+        </div>
 
-        <div class="plan-option" id="plan-monthly">
-            <div>
-                <div class="plan-title" id="t-monthly">Monthly Plan</div>
-                <div class="plan-desc" id="d-monthly">Cancel anytime</div>
-            </div>
-            <div class="plan-price" id="p-price-monthly">15.99 $</div>
-        </div>
+        <div class="plan-option" id="plan-monthly">
+            <div>
+                <div class="plan-title" id="t-monthly">Monthly Plan</div>
+                <div class="plan-desc" id="d-monthly">Cancel anytime</div>
+            </div>
+            <div class="plan-price" id="p-price-monthly">15.99 $</div>
+        </div>
 
-        <div class="plan-option" id="plan-yearly">
-            <div>
-                <div class="plan-title"><span id="t-yearly">Yearly Plan</span><span class="save-badge" id="b-yearly">Save 33%</span></div>
-                <div class="plan-desc" id="d-yearly">Best Value</div>
-            </div>
-            <div class="plan-price" id="p-price-yearly">129.99 $</div>
-        </div>
+        <div class="plan-option" id="plan-yearly">
+            <div>
+                <div class="plan-title"><span id="t-yearly">Yearly Plan</span><span class="save-badge" id="b-yearly">Save 33%</span></div>
+                <div class="plan-desc" id="d-yearly">Best Value</div>
+            </div>
+            <div class="plan-price" id="p-price-yearly">129.99 $</div>
+        </div>
 
-        <button class="btn-trial" id="btn-trial">Start 7-Day Free Trial</button>
+        <button class="btn-trial" id="btn-trial">Start 7-Day Free Trial</button>
 
-        <div class="footer-links">
-            <a id="lnk-restore" onclick="alert('System is processing item restoration...')">Restore Purchase</a>
-            <a href="https://autorc-design.carrd.co/#refund" target="_blank" id="lnk-refund">Refund Policy</a>
-            <a href="https://autorc-design.carrd.co/#privacy" target="_blank" id="lnk-privacy">Privacy</a>
-            <a href="https://autorc-design.carrd.co/#terms" target="_blank" id="lnk-terms">Terms of Service</a>
-        </div>
-    </div>
+        <div class="footer-links">
+            <a id="lnk-restore" onclick="alert('System is processing item restoration...')">Restore Purchase</a>
+            <a href="https://autorc-design.carrd.co/#refund" target="_blank" id="lnk-refund">Refund Policy</a>
+            <a href="https://autorc-design.carrd.co/#privacy" target="_blank" id="lnk-privacy">Privacy</a>
+            <a href="https://autorc-design.carrd.co/#terms" target="_blank" id="lnk-terms">Terms of Service</a>
+        </div>
+    </div>
 
-    <div id="view-loading" class="card-loading">
-        <div class="loader-box">
-            <div class="loader"></div>
-            <div class="loading-text">
-                <b style="color: white; font-size: 20px;">Auto RC PC</b>
-            </div>
-        </div>
-    </div>
+    <div id="view-loading" class="card-loading">
+        <div class="loader-box">
+            <div class="loader"></div>
+            <div class="loading-text">
+                <b style="color: white; font-size: 20px;">Auto RC PC</b>
+            </div>
+        </div>
+    </div>
 
-    <script type="text/javascript">
-        const ID_MONTHLY = 'pri_01ksm1vzz6zg2hayb8zmenvnb4';
-        const ID_YEARLY = 'pri_01ksm1s4zxbadbeaxhbp3rg3fz';
+    <script type="text/javascript">
+        const ID_MONTHLY = 'pri_01ksm1vzz6zg2hayb8zmenvnb4';
+        const ID_YEARLY = 'pri_01ksm1s4zxbadbeaxhbp3rg3fz';
 
-        const urlParams = new URLSearchParams(window.location.search);
-        let priceId = urlParams.get('price_id') || '';
-        const userId = urlParams.get('user_id') || 'review_user';
-        const deviceId = urlParams.get('device_id') || 'review_device';
-        const emailUser = urlParams.get('email') || ''; 
-        const lang = urlParams.get('lang') || 'en'; 
+        const urlParams = new URLSearchParams(window.location.search);
+        let priceId = urlParams.get('price_id') || '';
+        const userId = urlParams.get('user_id') || 'review_user';
+        const deviceId = urlParams.get('device_id') || 'review_device';
+        const emailUser = urlParams.get('email') || ''; 
+        const lang = urlParams.get('lang') || 'en'; 
 
-        if (lang === 'thai') {
-            document.getElementById('ui-title').innerText = 'อัปเกรดเป็นเวอร์ชัน Pro';
-            document.getElementById('f1').innerText = 'เข้าถึงทุกโมดูลการออกแบบโครงสร้าง';
-            document.getElementById('f2').innerText = 'ส่งออกรายการคำนวณ, รายการตัดเหล็ก, ใบประมาณราคา';
-            document.getElementById('f3').innerText = 'ส่งออกโมเดลโครงสร้าง และ ไฟล์ CAD';
-            document.getElementById('t-monthly').innerText = 'สมาชิกรายเดือน';
-            document.getElementById('d-monthly').innerText = 'ยกเลิกได้ทุกเมื่อ';
-            document.getElementById('t-yearly').innerText = 'สมาชิกรายปี';
-            document.getElementById('b-yearly').innerText = 'ประหยัด 33%';
-            document.getElementById('d-yearly').innerText = 'คุ้มค่าที่สุด';
-            document.getElementById('btn-trial').innerText = 'เริ่มทดลองใช้ฟรี 7 วัน';
-            document.getElementById('lnk-restore').innerText = 'กู้คืนรายการ';
-            document.getElementById('lnk-restore').setAttribute('onclick', "alert('ระบบกำลังดำเนินการกู้คืนรายการ...')");
-            document.getElementById('lnk-refund').innerText = 'นโยบายการคืนเงิน';
-            document.getElementById('lnk-privacy').innerText = 'ความเป็นส่วนตัว';
-            document.getElementById('lnk-terms').innerText = 'เงื่อนไขการบริการ';
-        }
+        if (lang === 'thai') {
+            document.getElementById('ui-title').innerText = 'อัปเกรดเป็นเวอร์ชัน Pro';
+            document.getElementById('f1').innerText = 'เข้าถึงทุกโมดูลการออกแบบโครงสร้าง';
+            document.getElementById('f2').innerText = 'ส่งออกรายการคำนวณ, รายการตัดเหล็ก, ใบประมาณราคา';
+            document.getElementById('f3').innerText = 'ส่งออกโมเดลโครงสร้าง และ ไฟล์ CAD';
+            document.getElementById('t-monthly').innerText = 'สมาชิกรายเดือน';
+            document.getElementById('d-monthly').innerText = 'ยกเลิกได้ทุกเมื่อ';
+            document.getElementById('t-yearly').innerText = 'สมาชิกรายปี';
+            document.getElementById('b-yearly').innerText = 'ประหยัด 33%';
+            document.getElementById('d-yearly').innerText = 'คุ้มค่าที่สุด';
+            document.getElementById('btn-trial').innerText = 'เริ่มทดลองใช้ฟรี 7 วัน';
+            document.getElementById('lnk-restore').innerText = 'กู้คืนรายการ';
+            document.getElementById('lnk-restore').setAttribute('onclick', "alert('ระบบกำลังดำเนินการกู้คืนรายการ...')");
+            document.getElementById('lnk-refund').innerText = 'นโยบายการคืนเงิน';
+            document.getElementById('lnk-privacy').innerText = 'ความเป็นส่วนตัว';
+            document.getElementById('lnk-terms').innerText = 'เงื่อนไขการบริการ';
+        }
 
-        // 📌 ยืนยันรันโหมด Sandbox บนสคริปต์หลัก v2
-        Paddle.Environment.set("sandbox");
-        
-        // 📌 กำหนด Vendor ID (ใส่เลขหลังบ้านของคุณลงไปเพื่อความสมบูรณ์ในการคุยกับระบบราคาสายดั้งเดิม)
-        Paddle.Setup({ vendor: 12345 }); 
+        Paddle.Environment.set("sandbox");
+        
+        Paddle.Initialize({
+            token: 'test_4c6336ab0eb5b58c83150a6fe29',
+            eventCallback: function(data) {
+                console.log("=== PADDLE DEBUG EVENT TRIGGERED ===", data.event, data);
 
-        // 🎯 ลบคำสั่ง Paddle.Price.preview ที่พังออกถาวร! 
-        // สลับมาใช้ Paddle.Prices.Update ของ v2 แท้ดั้งเดิมในการอัปเดตราคาสดจากเซิร์ฟเวอร์แบบปลอดภัย
-        if (typeof Paddle !== 'undefined' && Paddle.Prices) {
-            Paddle.Prices.Update({
-                prices: [ID_MONTHLY, ID_YEARLY],
-                success: function(pricesData) {
-                    console.log("=== PADDLE LIVE PRICES ===", pricesData);
-                    if (pricesData && pricesData.products) {
-                        pricesData.products.forEach(function(p) {
-                            let priceText = (typeof p.price === 'object') ? (p.price.gross || p.price.net) : p.price;
-                            if (p.id === ID_MONTHLY) document.getElementById('p-price-monthly').innerText = priceText;
-                            if (p.id === ID_YEARLY) document.getElementById('p-price-yearly').innerText = priceText;
-                        });
-                    }
-                }
-            });
-        }
+                // 📌 จุดสำคัญ: เพิ่มกลุ่ม Event ตระกูล closed เข้ามาเพื่อสั่งปิดหน้าโหลดเมื่อผู้ใช้ยกเลิกหรือปิดหน้าต่างชำระเงิน
+                const targetCloseEvents = [
+                    'checkout.loaded', 'Checkout.Loaded',
+                    'checkout.rendering', 'Checkout.Rendering',
+                    'checkout.displayed', 'Checkout.Displayed',
+                    'checkout.opened', 'Checkout.Opened',
+                    'checkout.closed', 'Checkout.Closed' 
+                ];
 
-        // ลоจิกเปิดบิลอัตโนมัติเมื่อยิงลิงก์มาจากตัวแอปเดสก์ท็อป
-        if (priceId && priceId.trim() !== '' && priceId.startsWith('pri_')) {
-            document.getElementById('view-loading').style.display = 'flex';
-            setTimeout(() => { 
-                openCheckout(priceId); 
-            }, 400);
-        }
+                if (targetCloseEvents.includes(data.event)) {
+                    console.log(`🎯 พบเจอ Event สำหรับสั่งปิดหน้าโหลด: ${data.event}`);
+                    document.getElementById('view-loading').style.display = 'none';
+                }
+            }
+        });
+         console.log("Paddle",Paddle)
+        if (typeof Paddle !== 'undefined') {
+            try {
+                Paddle.Price.preview({
+                    items: [
+                        { priceId: ID_MONTHLY, quantity: 1 },
+                        { priceId: ID_YEARLY, quantity: 1 }
+                    ]
+                }).then(function(result) {
+                    console.log("=== 1. PADDLE v3 PRICE PREVIEW DATA ===", result);
+                    if (result && result.details && result.details.lineItems) {
+                        result.details.lineItems.forEach(function(item) {
+                            console.log(`[V3 Method] ไอดีราคา: ${item.priceId} -> ราคาสุทธิ: ${item.totals.total}`);
+                            
+                            if (item.priceId === ID_MONTHLY) {
+                                document.getElementById('p-price-monthly').innerText = item.formattedTotals.total;
+                            } else if (item.priceId === ID_YEARLY) {
+                                document.getElementById('p-price-yearly').innerText = item.formattedTotals.total;
+                            }
+                        });
+                    }
+                }).catch(function(err) {
+                    console.warn("เกิดข้อผิดพลาดในการเรียก Preview ราคา (V3) กำลังรันแผนสำรอง...", err);
+                    runFallbackPriceFetch();
+                });
+            } catch(err) {
+                console.warn("ไม่สามารถรันคำสั่ง Paddle.Price.preview ได้ สลับไปใช้แผนสำรองทันที...", err);
+                runFallbackPriceFetch();
+            }
+        }
 
-        document.querySelectorAll('.plan-option').forEach(function(el) {
-            el.addEventListener('click', function() {
-                let selectedId = ID_MONTHLY; 
-                if (this.id === 'plan-yearly') {
-                    selectedId = ID_YEARLY; 
-                }
-                openCheckout(selectedId);
-            });
-        });
+        function runFallbackPriceFetch() {
+           console.log("ID_MONTHLY",ID_MONTHLY)
+            fetch(`https://sandbox-checkout.paddle.com/api/2.0/prices?product_ids=${ID_MONTHLY},${ID_YEARLY}`)
+            .then(res => res.json())
+            .then(resData => {
+                console.log("=== 2. PADDLE FETCH API FALLBACK DATA ===", resData);
+                if (resData && resData.response && resData.response.products) {
+                    resData.response.products.forEach(function(prod) {
+                        console.log(`[Fetch] สินค้าไอดี: ${prod.product_id} -> ราคาคีย์ย่อย:`, prod.recurring_price);
+                        if (prod.product_id.toString() === ID_MONTHLY) {
+                            document.getElementById('p-price-monthly').innerText = prod.recurring_price;
+                            
+                        } else if (prod.product_id.toString() === ID_YEARLY) {
+                            document.getElementById('p-price-yearly').innerText = prod.recurring_price;
+                        }
+                    });
+                }
+            }).catch(fetchErr => console.error("Fetch ราคาล้มเหลวโดยสิ้นเชิง:", fetchErr));
+        }
 
-        const trialBtn = document.getElementById('btn-trial');
-        if (trialBtn) {
-            trialBtn.addEventListener('click', function() {
-                openCheckout(ID_YEARLY);
-            });
-        }
-          
-        // 📌 ฟังก์ชันเปิด Checkout สเปก v2 แท้ดั้งเดิม ปิดตัวโหลดดิ้งได้แม่นยำผ่าน Inline Callback
-        function openCheckout(targetProductId) {
-            if (typeof Paddle === 'undefined') {
-                alert(lang === 'thai' ? "ไม่สามารถเรียกใช้งานระบบชำระเงินได้" : "Checkout error.");
-                return;
-            }
-            
-            document.getElementById('view-loading').style.display = 'flex';
+        if (priceId && priceId.trim() !== '' && priceId.startsWith('pri_')) {
+            document.getElementById('view-loading').style.display = 'flex';
+            setTimeout(() => { 
+                openCheckout([{ priceId: priceId, quantity: 1 }]); 
+            }, 400);
+        }
 
-            Paddle.Checkout.open({
-                product: targetProductId, // ใช้ product รับค่าไอดีเดี่ยว ๆ ตรงตามโมเดลดั้งเดิม
-                email: emailUser || null,
-                passthrough: JSON.stringify({ user_id: userId, device_id: deviceId }),
-                locale: lang === 'thai' ? 'th' : 'en',
-                theme: 'dark',
-                
-                // 🎯 คุมตัวโหลดดิ้งเปิด/ปิด ผ่านชุด Event ดั้งเดิมที่เบราว์เซอร์รู้จักแน่นอน
-                initCallback: function(data) {
-                    document.getElementById('view-loading').style.display = 'none';
-                },
-                closeCallback: function(data) {
-                    document.getElementById('view-loading').style.display = 'none';
-                }
-            });
-        }
-    </script>
+        document.querySelectorAll('.plan-option').forEach(function(el) {
+            el.addEventListener('click', function() {
+                let selectedId = ID_MONTHLY; 
+                if (this.id === 'plan-yearly') {
+                    selectedId = ID_YEARLY; 
+                }
+                openCheckout([{ priceId: selectedId, quantity: 1 }]);
+            });
+        });
+
+        const trialBtn = document.getElementById('btn-trial');
+        if (trialBtn) {
+            trialBtn.addEventListener('click', function() {
+                openCheckout([{ priceId: ID_YEARLY, quantity: 1 }]);
+            });
+        }
+          
+        function openCheckout(items) {
+            if (typeof Paddle === 'undefined') {
+                alert(lang === 'thai' ? "ไม่สามารถเรียกใช้งานระบบชำระเงินได้ กรุณาปิดตัวบล็อกโฆษณา" : "Checkout error. Please disable AdBlocker.");
+                return;
+            }
+            try {
+                document.getElementById('view-loading').style.display = 'flex';
+
+                console.log("=== INITIATING CHECKOUT ===", {
+                    items: items,
+                    lang: lang,
+                    userId: userId,
+                    deviceId: deviceId,
+                    email: emailUser
+                });
+
+                let checkoutOptions = {
+                    items: items,
+                    settings: {
+                        displayMode: "overlay",
+                        theme: "dark",
+                        locale: lang === 'thai' ? 'th' : 'en'
+                    },
+                    customData: { 
+                        user_id: userId, 
+                        device_id: deviceId 
+                    }
+                };
+
+                if (emailUser && emailUser.trim() !== '') {
+                    checkoutOptions.customer = {
+                        email: emailUser
+                    };
+                }
+
+                Paddle.Checkout.open(checkoutOptions);
+              
+            } catch (e) {
+                console.error("Checkout System Error:", e);
+                document.getElementById('view-loading').style.display = 'none';
+                alert(lang === 'thai' ? "เกิดข้อผิดพลาดในการเปิดระบบชำระเงิน" : "Error opening checkout.");
+            }
+        }
+    </script>
 </body>
 </html>
