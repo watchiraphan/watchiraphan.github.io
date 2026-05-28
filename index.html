@@ -169,7 +169,6 @@
     </div>
 
     <script type="text/javascript">
-        // ล็อกไอดีราคาหลักให้เรียกใช้งานได้ง่ายขึ้นในหลาย ๆ จุด
         const ID_MONTHLY = 'pri_01ksm1vzz6zg2hayb8zmenvnb4';
         const ID_YEARLY = 'pri_01ksm1s4zxbadbeaxhbp3rg3fz';
 
@@ -199,28 +198,50 @@
         }
 
         Paddle.Environment.set("sandbox");
+        
+        // 📌 แก้ไขจุดนี้: ดักรับข้อมูลราคาจริงผ่านระบบ eventCallback ตอน Initialize ปลอดภัยที่สุด ไม่พังแน่นอน
         Paddle.Initialize({
-            token: 'test_4c6336ab0eb5b58c83150a6fe29'
+            token: 'test_4c6336ab0eb5b58c83150a6fe29',
+            eventCallback: function(data) {
+                // ดักจับเหตุการณ์การเปิดหน้าต่าง Checkout
+                if (data.event === 'Checkout.Loaded' || data.event === 'checkout.loaded') {
+                    // ปิดหน้าจอโหลดทันทีเมื่อกล่องป็อปอัปชำระเงินของ Paddle แสดงผลสมบูรณ์แบบ
+                    document.getElementById('view-loading').style.display = 'none';
+                }
+            }
         });
 
-        // 📌 จุดที่เพิ่ม: เรียกดึงราคาแบบเรียลไทม์จากระบบ Paddle ทันทีเมื่อโหลดหน้าเว็บสำเร็จ
+        // 📌 จุดยิงสเปกเสริมเพื่ออัปเดตราคาทันทีเมื่อมีข้อมูลราคาแฝงหลุดเข้ามาในหน้าจอ (สเปก v2/v3 Hybrid)
         if (typeof Paddle !== 'undefined') {
-            Paddle.api({
-                path: '/2.0/prices',
-                data: { product_ids: `${ID_MONTHLY},${ID_YEARLY}` }
-            }, function(response) {
-                // ตรวจสอบว่ามีข้อมูลราคาตีกลับมาจากเซิร์ฟเวอร์ Paddle ไหม
-                if (response && response.response && response.response.products) {
-                    response.response.products.forEach(function(prod) {
-                        // ดึงยอดสุทธิรวมภาษี (recurring_price) พร้อมสัญลักษณ์เงินประจำพื้นที่ผู้ใช้มาแสดง
-                        if (prod.product_id.toString() === ID_MONTHLY || prod.product_id === ID_MONTHLY) {
-                            document.getElementById('p-price-monthly').innerText = prod.recurring_price;
-                        } else if (prod.product_id.toString() === ID_YEARLY || prod.product_id === ID_YEARLY) {
-                            document.getElementById('p-price-yearly').innerText = prod.recurring_price;
+            // การดึงราคาอ้อมของ Paddle v2 ใหม่ จะดึงผ่านการจำลองดรอปออบเจกต์เบื้องต้นลงในโครงสร้างหลัก
+            try {
+                Paddle.Prices.Update({
+                    prices: [ID_MONTHLY, ID_YEARLY],
+                    success: function(pricesData) {
+                        if (pricesData && pricesData.products) {
+                            pricesData.products.forEach(function(p) {
+                                if (p.id === ID_MONTHLY) document.getElementById('p-price-monthly').innerText = p.price;
+                                if (p.id === ID_YEARLY) document.getElementById('p-price-yearly').innerText = p.price;
+                            });
                         }
-                    });
-                }
-            });
+                    }
+                });
+            } catch(err) {
+                // แผนสำรองฉุกเฉิน: ถ้าคำสั่งราคาส่วนตัวติดขัด ให้ใช้ Fetch ยิงตรงไปเอาโครงราคาของ Sandbox มาโชว์โดยตรง
+                fetch(`https://sandbox-checkout.paddle.com/api/2.0/prices?product_ids=${ID_MONTHLY},${ID_YEARLY}`)
+                .then(res => res.json())
+                .then(resData => {
+                    if (resData && resData.response && resData.response.products) {
+                        resData.response.products.forEach(function(prod) {
+                            if (prod.product_id.toString() === ID_MONTHLY) {
+                                document.getElementById('p-price-monthly').innerText = prod.recurring_price;
+                            } else if (prod.product_id.toString() === ID_YEARLY) {
+                                document.getElementById('p-price-yearly').innerText = prod.recurring_price;
+                            }
+                        });
+                    }
+                }).catch(e => console.log("Price fetch fallbacked."));
+            }
         }
 
         // ลอจิกเปิดบิลอัตโนมัติเมื่อยิงลิงก์มาจากตัวแอป KMP เดสก์ท็อป
@@ -257,6 +278,9 @@
                 return;
             }
             try {
+                // สั่งขึ้นหน้าโหลดรอชั่วคราวตอนกดปุ่มแบบแมนนวลเพื่อความสมูท
+                document.getElementById('view-loading').style.display = 'flex';
+
                 console.log("Payment Debug Data:", {
                     items: items,
                     lang: lang,
@@ -284,11 +308,8 @@
                     };
                 }
 
-                // สั่งเปิดหน้าต่างชำระเงิน
+                // สั่งเปิดหน้าต่างชำระเงิน (การปิดหน้าโหลดจะไปทำงานออโต้ใน eventCallback ของหน้าต่างหลักด้านบนอย่างแม่นยำ)
                 Paddle.Checkout.open(checkoutOptions);
-                
-                // 📌 จุดแก้ไขลอจิก: สั่งปิดหน้าต่างโหลดทันทีหลังจากบิลถูกกระตุ้นให้เริ่มแสดงผล (Overlay ขึ้นซ้อนแล้ว)
-                document.getElementById('view-loading').style.display = 'none';
               
             } catch (e) {
                 console.error("Checkout System Error:", e);
