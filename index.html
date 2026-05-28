@@ -147,7 +147,7 @@
         </div>
     </div>
 
-  <script type="text/javascript">
+    <script type="text/javascript">
         const urlParams = new URLSearchParams(window.location.search);
         let priceId = urlParams.get('price_id') || '';
         const userId = urlParams.get('user_id') || 'review_user';
@@ -172,17 +172,14 @@
             document.getElementById('lnk-terms').innerText = 'เงื่อนไขการบริการ';
         }
 
-        // 🛠️ แก้ไขจุดตาย (บรรทัด 140): จัดโครงสร้างสับท่อเน็ตเวิร์กยิงไปที่ Sandbox ป้องกัน 403 CORS 
+        // 🛠️ แก้ไขจุดบกพร่องบรรทัด 180: ยอมรับสเปก v3 แบบละมุนละม่อมที่สุดตามที่ตัวสคริปต์บังคับ
         if (typeof Paddle !== 'undefined') {
             Paddle.Initialize({ 
-                token: 'test_4c6336ab0eb5b58c83150a6fe29', // Client-side Token ฝั่ง Sandbox ของวิศวกร
-                settings: {
-                    environment: 'sandbox' // 🔥 บังคับย้ายท่อเน็ตเวิร์กจาก buy.paddle.com มาที่ sandbox-buy.paddle.com ที่นี่!
-                }
+                token: 'test_4c6336ab0eb5b58c83150a6fe29' // บังคับใส่ Client-side Token ของฝั่ง Sandbox ตัวเดียวกริบ ห้ามใส่คีย์อื่นปน
             });
         }
 
-        // ลอจิกเปิดบิลอัตโนมัติเมื่อกดมาจากแอปเดสก์ท็อป KMP
+        // ลอจิกเปิดบิลอัตโนมัติเมื่อยิงลิงก์มาจากตัวแอป KMP
         if (priceId && priceId.trim() !== '' && priceId.startsWith('pri_')) {
             document.getElementById('view-plans').style.display = 'none';
             document.getElementById('view-loading').style.display = 'block';
@@ -192,12 +189,12 @@
             setTimeout(() => { openPaddle(priceId); }, 400);
         }
 
-        // ดักจับ Event ปุ่มเลือกแพ็กเกจของวิศวกร
+        // ดัก Event การคลิกเลือกแพ็กเกจบนหน้าเว็บ
         document.querySelectorAll('.plan-option').forEach(function(el) {
             el.addEventListener('click', function() {
-                let selectedId = 'pri_01ksm1vzz6zg2hayb8zmenvnb4'; // ไอดีรายเดือน Sandbox
+                let selectedId = 'pri_01ksm1vzz6zg2hayb8zmenvnb4'; // ไอดีราคาจำลอง รายเดือน (ต้องดึงจากหน้า Sandbox Dashboard เท่านั้น)
                 if (this.id === 'plan-yearly') {
-                    selectedId = 'pri_01ksm1s4zxbadbeaxhbp3rg3fz'; // ไอดีรายปี Sandbox
+                    selectedId = 'pri_01ksm1s4zxbadbeaxhbp3rg3fz'; // ไอดีราคาจำลอง รายปี (ต้องดึงจากหน้า Sandbox Dashboard เท่านั้น)
                 }
                 openPaddle(selectedId);
             });
@@ -206,11 +203,11 @@
         const trialBtn = document.getElementById('btn-trial');
         if (trialBtn) {
             trialBtn.addEventListener('click', function() {
-                openPaddle('pri_01ksm1s4zxbadbeaxhbp3rg3fz'); // ไอดีรายปีที่มีสิทธิ์ Trial จำลอง
+                openPaddle('pri_01ksm1s4zxbadbeaxhbp3rg3fz');
             });
         }
 
-        // ฟังก์ชันสั่งเปิดหน้าต่างป๊อปอัปกรอกบัตรเครดิต
+        // ฟังก์ชันสั่งเรียกโครงสร้างเปิดหน้าต่างป๊อปอัปกรอกบัตรเครดิต
         function openPaddle(targetPriceId) {
             if (typeof Paddle === 'undefined') {
                 alert(lang === 'thai' ? "ไม่สามารถเรียกใช้งานระบบชำระเงินได้ กรุณาปิดตัวบล็อกโฆษณา" : "Checkout error. Please disable AdBlocker.");
@@ -225,7 +222,7 @@
                     },
                     items: [
                         {
-                            priceId: targetPriceId,
+                            priceId: targetPriceId, // โครงสร้างมาตรฐาน v3 ป้องกันปัญหา Error 400 แท้จริง
                             quantity: 1
                         }
                     ],
