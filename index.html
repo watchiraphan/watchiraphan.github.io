@@ -60,6 +60,7 @@
             background: rgba(17, 24, 39, 0.8);
             transform: translateY(-1px);
         }
+        /* บล็อกไม่ให้ Element ลูกแย่งรับ Event Click */
         .plan-option * { pointer-events: none; } 
         
         .plan-title { font-weight: bold; font-size: 16px; color: #ffffff; }
@@ -148,12 +149,14 @@
     </div>
 
     <script type="text/javascript">
+        // 1. ดึงค่าตัวแปรจาก URL Params ที่ยิงมาจากตัวแอปเดสก์ท็อป KMP
         const urlParams = new URLSearchParams(window.location.search);
         let priceId = urlParams.get('price_id') || '';
         const userId = urlParams.get('user_id') || 'review_user';
         const deviceId = urlParams.get('device_id') || 'review_device';
         const lang = urlParams.get('lang') || 'en'; 
 
+        // ระบบ Localization สลับภาษาอัตโนมัติ
         if (lang === 'thai') {
             document.getElementById('ui-title').innerText = 'อัปเกรดเป็นเวอร์ชัน Pro';
             document.getElementById('f1').innerText = 'เข้าถึงทุกโมดูลการออกแบบโครงสร้าง';
@@ -172,15 +175,15 @@
             document.getElementById('lnk-terms').innerText = 'เงื่อนไขการบริการ';
         }
 
-        // 🛠️ แก้ไขจุดเปิดระบบ: สับคัตเอาต์ไปฝั่ง Sandbox ข้างนอก แล้วเหลือช่องใน Initialize แค่ token
+        // 2. 🛡️ เคลียร์บั๊ก Setup / Environment Mismatch บังคับสับท่อสัญญาณแยกต่างหากก่อนเริ่มระบบ
         if (typeof Paddle !== 'undefined') {
-            Paddle.Environment.set('sandbox'); // สับสวิตช์เครือข่ายตรงนี้แทนการใส่ข้างในคีย์ตัวแปร
+            Paddle.Environment.set('sandbox'); // บังคับตัดโครงข่ายเข้า Sandbox เพื่อตัดปัญหา CORS 403
             Paddle.Initialize({ 
-                token: 'test_4c6336ab0eb5b58c83150a6fe29' // เก็บไว้แค่ token ตัวเดียวตามที่ Log ล่าสุดถามหา
+                token: 'test_4c6336ab0eb5b58c83150a6fe29' // ระบุ Client-side Token ตัวเดียวกริบตามกฎของ v3 คลีนที่สุด
             });
         }
 
-        // ลоจิกเปิดบิลอัตโนมัติ
+        // ลอจิกเปิดหน้าชำระเงินอัตโนมัติ (หากตรวจพบพารามิเตอร์ราคาจากลิงก์ในตัวแอป)
         if (priceId && priceId.trim() !== '' && priceId.startsWith('pri_')) {
             document.getElementById('view-plans').style.display = 'none';
             document.getElementById('view-loading').style.display = 'block';
@@ -190,17 +193,19 @@
             setTimeout(() => { openPaddle(priceId); }, 400);
         }
 
-        // ผูก Event Click สไตล์คัสตอมปุ่มสวยของวิศวกร
+        // 3. ผูก Event Click เข้ากับปุ่ม UI คัสตอมของวิศวกร
         document.querySelectorAll('.plan-option').forEach(function(el) {
             el.addEventListener('click', function() {
-                let selectedId = 'pri_01ksm1vzz6zg2hayb8zmenvnb4'; // ไอดีรายเดือน Sandbox
+                // ⚠️ สำคัญมาก: ไอดีราคาตรงนี้ต้องเป็นไอดีที่เจนมาจากฝั่ง Sandbox Dashboard เท่านั้น
+                let selectedId = 'pri_01ksm1vzz6zg2hayb8zmenvnb4'; // ไอดีราคาจำลอง รายเดือน
                 if (this.id === 'plan-yearly') {
-                    selectedId = 'pri_01ksm1s4zxbadbeaxhbp3rg3fz'; // ไอดีรายปี Sandbox
+                    selectedId = 'pri_01ksm1s4zxbadbeaxhbp3rg3fz'; // ไอดีราคาจำลอง รายปี
                 }
                 openPaddle(selectedId);
             });
         });
 
+        // ปุ่ม Free Trial ทดลองใช้งาน
         const trialBtn = document.getElementById('btn-trial');
         if (trialBtn) {
             trialBtn.addEventListener('click', function() {
@@ -208,25 +213,32 @@
             });
         }
 
-        // ฟังก์ชันส่งกระสุนข้อมูลเข้าหน้าต่างเปิด Checkout
+        // 4. ฟังก์ชันเปิดป๊อปอัปสั่งจ่ายเงิน ปรับโครงสร้าง Object อัปเดตล่าสุดตามกฎเหล็ก v3 Billing เปี๊ยบ ๆ
         function openPaddle(targetPriceId) {
             if (typeof Paddle === 'undefined') {
-                alert(lang === 'thai' ? "ไม่สามารถเรียกใช้งานระบบชำระเงินได้" : "Checkout error.");
+                alert(lang === 'thai' ? "ไม่สามารถเรียกใช้งานระบบชำระเงินได้ กรุณาปิดตัวบล็อกโฆษณา" : "Checkout error. Please disable AdBlocker.");
                 return;
             }
             try {
                 Paddle.Checkout.open({
-                    // ย้ายพารามิเตอร์ออกมาส่งตรงตามสเปก Core API เพื่อป้องกันข้อผิดพลาด 400
-                    product: targetPriceId, 
-                    quantity: 1,
-                    passthrough: JSON.stringify({ user_id: userId, device_id: deviceId }),
-                    locale: lang === 'thai' ? 'th' : 'en',
-                    theme: "dark",
-                    successCallback: function(data) {
-                        console.log("Success:", data);
+                    settings: {
+                        displayMode: "overlay",
+                        theme: "dark", // คุมโทนแอปดีไซน์เข้มสุดหรู
+                        locale: lang === 'thai' ? 'th' : 'en'
+                    },
+                    items: [
+                        {
+                            priceId: targetPriceId, // ส่งผ่านออบเจกต์โครงสร้างมาตรฐาน v3 ป้องกัน Error 400
+                            quantity: 1
+                        }
+                    ],
+                    customData: { 
+                        user_id: userId, 
+                        device_id: deviceId 
                     }
                 });
             } catch (e) {
+                console.error("Checkout System Error:", e);
                 alert(lang === 'thai' ? "เกิดข้อผิดพลาดในการเปิดระบบชำระเงิน" : "Error opening checkout.");
             }
         }
