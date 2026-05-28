@@ -42,7 +42,6 @@
         .feature-item { display: flex; align-items: center; margin-bottom: 12px; font-size: 14px; color: #CAF8F4; }
         .feature-icon { color: #55FFFF; margin-right: 12px; font-size: 20px; flex-shrink: 0; }
 
-        /* UI ปุ่มดั้งเดิมสุดสวยของวิศวกร */
         .plan-option {
             background: rgba(26, 26, 26, 0.7); 
             border: 2px solid #333333; 
@@ -148,7 +147,7 @@
         </div>
     </div>
 
-    <script>
+    <script type="text/javascript">
         const urlParams = new URLSearchParams(window.location.search);
         let priceId = urlParams.get('price_id') || '';
         const userId = urlParams.get('user_id') || 'review_user';
@@ -173,19 +172,16 @@
             document.getElementById('lnk-terms').innerText = 'เงื่อนไขการบริการ';
         }
 
-        // 🛠️ แก้ไขจุดเริ่มต้นการตั้งค่า: เปลี่ยนโครงสร้างตามมาตรฐานแก้บั๊ก CORS 403 และ Unknown Option
+        // 🛠️ จุดที่ 1: เปลี่ยนมาใช้ Paddle.Initialize() และระบุสภาพแวดล้อมให้ตรงล็อกตามสเปก v3 จริง ๆ
         if (typeof Paddle !== 'undefined') {
-            Paddle.Environment.set('sandbox'); // บังคับให้เบราว์เซอร์วิ่งเข้า Sandbox เสมอ
-            Paddle.Setup({ 
-                vendor: 12345, // ⚠️ เปลี่ยนเป็นเลข Vendor ID ของวิศวกร (ตัวเลขล้วน)
-                options: {
-                    extended_interface: true
-                }
+            Paddle.Initialize({ 
+                token: 'test_4c6336ab0eb5b58c83150a6fe29', // Client-side Token ของวิศวกร
+                environment: 'sandbox' // บังคับตัดการเชื่อมต่อไปยัง Sandbox เพื่อเคลียร์ปัญหา CORS 403
             });
         }
 
-        // ลоจิกเปิดบิลอัตโนมัติจากในแอป
-        if (priceId && priceId.trim() !== '') {
+        // ลอจิกเปิดบิลอัตโนมัติจากในแอป
+        if (priceId && priceId.trim() !== '' && priceId.startsWith('pri_')) {
             document.getElementById('view-plans').style.display = 'none';
             document.getElementById('view-loading').style.display = 'block';
             if (lang === 'thai') { 
@@ -194,12 +190,12 @@
             setTimeout(() => { openPaddle(priceId); }, 400);
         }
 
-        // ผูก Event Click เข้ากับดีไซน์ปุ่มเดิมสุดสวย
+        // จับเหตุการณ์ปุ่มกดเลือกแพ็กเกจ (ใช้ UI เดิมที่วิศวกรออกแบบไว้)
         document.querySelectorAll('.plan-option').forEach(function(el) {
             el.addEventListener('click', function() {
-                let selectedId = 'pri_01ksm1vzz6zg2hayb8zmenvnb4'; // ไอดีราคาของ Sandbox
+                let selectedId = 'pri_01ksm1vzz6zg2hayb8zmenvnb4'; // ไอดีรายเดือน Sandbox ของวิศวกร
                 if (this.id === 'plan-yearly') {
-                    selectedId = 'pri_01ksm1s4zxbadbeaxhbp3rg3fz'; // ไอดีราคาของ Sandbox
+                    selectedId = 'pri_01ksm1s4zxbadbeaxhbp3rg3fz'; // ไอดีรายปี Sandbox ของวิศวกร
                 }
                 openPaddle(selectedId);
             });
@@ -208,11 +204,11 @@
         const trialBtn = document.getElementById('btn-trial');
         if (trialBtn) {
             trialBtn.addEventListener('click', function() {
-                openPaddle('pri_01ksm1s4zxbadbeaxhbp3rg3fz');
+                openPaddle('pri_01ksm1s4zxbadbeaxhbp3rg3fz'); // ไอดีรายปีที่มี Trial
             });
         }
 
-        // ฟังก์ชันแกนหลักสำหรับเปิด Checkout v3 แบบกำหนดเส้นทางไม่ให้ระเบิด
+        // 🛠️ จุดที่ 2: ใช้รูปแบบ Paddle.Checkout.open() ที่ถูกต้องสำหรับสเปก Initialize
         function openPaddle(targetPriceId) {
             if (typeof Paddle === 'undefined') {
                 alert(lang === 'thai' ? "ไม่สามารถเรียกใช้งานระบบชำระเงินได้ กรุณาปิดตัวบล็อกโฆษณา" : "Checkout error. Please disable AdBlocker.");
@@ -220,13 +216,20 @@
             }
             try {
                 Paddle.Checkout.open({
-                    override: "https://sandbox-checkout.paddle.com", // ทะลวงบล็อกเครือข่าย buy.paddle.com
-                    product: targetPriceId, // ส่ง Price ID ผ่านพารามิเตอร์แกนหลัก
-                    passthrough: JSON.stringify({ user_id: userId, device_id: deviceId }), // แนบ Custom Data
-                    locale: lang === 'thai' ? 'th' : 'en',
-                    theme: "dark", // บังคับธีมมืดให้เข้ากับดีไซน์แอป
-                    successCallback: function(data) {
-                        console.log("Payment completed successfully:", data);
+                    settings: {
+                        displayMode: "overlay",
+                        theme: "dark",
+                        locale: lang === 'thai' ? 'th' : 'en'
+                    },
+                    items: [
+                        {
+                            priceId: targetPriceId,
+                            quantity: 1
+                        }
+                    ],
+                    customData: { 
+                        user_id: userId, 
+                        device_id: deviceId 
                     }
                 });
             } catch (e) {
