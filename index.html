@@ -196,49 +196,35 @@
             document.getElementById('lnk-terms').innerText = 'เงื่อนไขการบริการ';
         }
 
-        // 📌 ยืนยันรันโหมด Sandbox บนสคริปต์หลัก
+        // 📌 ยืนยันรันโหมด Sandbox บนสคริปต์หลัก v2
         Paddle.Environment.set("sandbox");
         
-        // 📌 เรียก Initialize แบบ v3 บนตัวสคริปต์หลัก ดักจับ Event ปิดตัวโหลดดิ้งอย่างสมบูรณ์
-        Paddle.Initialize({
-            token: 'test_4c6336ab0eb5b58c83150a6fe29', 
-            eventCallback: function(data) {
-                console.log("=== PADDLE EVENT TRIGGERED ===", data.event);
-                
-                // ถ้ายูสเซอร์กดยกเลิก ปิดหน้าต่าง หรือหน้าต่างเปิดสำเร็จ -> สั่งปิดตัวโหลดดิ้งทันที!
-                const closeTriggers = [
-                    'checkout.loaded', 'checkout.displayed', 'checkout.closed', 'Checkout.Closed'
-                ];
-                if (closeTriggers.includes(data.event)) {
-                    document.getElementById('view-loading').style.display = 'none';
-                }
-            }
-        });
+        // 📌 กำหนด Vendor ID (ใส่เลขหลังบ้านของคุณลงไปเพื่อความสมบูรณ์ในการคุยกับระบบราคาสายดั้งเดิม)
+        Paddle.Setup({ vendor: 12345 }); 
 
-        // 📌 ยิงฟังก์ชันพรีวิวราคาแบบไม่มี try-catch ครอบตามสั่ง ถ้าพังให้มันฟ้องในคอนโซลตรง ๆ
-        Paddle.Price.preview({
-            items: [
-                { priceId: ID_MONTHLY, quantity: 1 },
-                { priceId: ID_YEARLY, quantity: 1 }
-            ]
-        }).then(function(result) {
-            console.log("=== PRICE DATA SUCCESS ===", result);
-            if (result && result.details && result.details.lineItems) {
-                result.details.lineItems.forEach(function(item) {
-                    if (item.priceId === ID_MONTHLY) {
-                        document.getElementById('p-price-monthly').innerText = item.formattedTotals.total;
-                    } else if (item.priceId === ID_YEARLY) {
-                        document.getElementById('p-price-yearly').innerText = item.formattedTotals.total;
+        // 🎯 ลบคำสั่ง Paddle.Price.preview ที่พังออกถาวร! 
+        // สลับมาใช้ Paddle.Prices.Update ของ v2 แท้ดั้งเดิมในการอัปเดตราคาสดจากเซิร์ฟเวอร์แบบปลอดภัย
+        if (typeof Paddle !== 'undefined' && Paddle.Prices) {
+            Paddle.Prices.Update({
+                prices: [ID_MONTHLY, ID_YEARLY],
+                success: function(pricesData) {
+                    console.log("=== PADDLE LIVE PRICES ===", pricesData);
+                    if (pricesData && pricesData.products) {
+                        pricesData.products.forEach(function(p) {
+                            let priceText = (typeof p.price === 'object') ? (p.price.gross || p.price.net) : p.price;
+                            if (p.id === ID_MONTHLY) document.getElementById('p-price-monthly').innerText = priceText;
+                            if (p.id === ID_YEARLY) document.getElementById('p-price-yearly').innerText = priceText;
+                        });
                     }
-                });
-            }
-        });
+                }
+            });
+        }
 
-        // ลอจิกเปิดบิลอัตโนมัติเมื่อส่งราคามาจากตัวแอปเดสก์ท็อป
+        // ลоจิกเปิดบิลอัตโนมัติเมื่อยิงลิงก์มาจากตัวแอปเดสก์ท็อป
         if (priceId && priceId.trim() !== '' && priceId.startsWith('pri_')) {
             document.getElementById('view-loading').style.display = 'flex';
             setTimeout(() => { 
-                openCheckout([{ priceId: priceId, quantity: 1 }]); 
+                openCheckout(priceId); 
             }, 400);
         }
 
@@ -248,33 +234,40 @@
                 if (this.id === 'plan-yearly') {
                     selectedId = ID_YEARLY; 
                 }
-                openCheckout([{ priceId: selectedId, quantity: 1 }]);
+                openCheckout(selectedId);
             });
         });
 
         const trialBtn = document.getElementById('btn-trial');
         if (trialBtn) {
             trialBtn.addEventListener('click', function() {
-                openCheckout([{ priceId: ID_YEARLY, quantity: 1 }]);
+                openCheckout(ID_YEARLY);
             });
         }
           
-        function openCheckout(items) {
+        // 📌 ฟังก์ชันเปิด Checkout สเปก v2 แท้ดั้งเดิม ปิดตัวโหลดดิ้งได้แม่นยำผ่าน Inline Callback
+        function openCheckout(targetProductId) {
+            if (typeof Paddle === 'undefined') {
+                alert(lang === 'thai' ? "ไม่สามารถเรียกใช้งานระบบชำระเงินได้" : "Checkout error.");
+                return;
+            }
+            
             document.getElementById('view-loading').style.display = 'flex';
 
-            // โครงสร้างคำสั่งเปิดบิลของระบบ v3 Billing ตัวจริง
-             Paddle.Checkout.open({
-                items: items,
-                settings: {
-                    displayMode: "overlay",
-                    theme: "dark",
-                    locale: lang === 'thai' ? 'th' : 'en'
+            Paddle.Checkout.open({
+                product: targetProductId, // ใช้ product รับค่าไอดีเดี่ยว ๆ ตรงตามโมเดลดั้งเดิม
+                email: emailUser || null,
+                passthrough: JSON.stringify({ user_id: userId, device_id: deviceId }),
+                locale: lang === 'thai' ? 'th' : 'en',
+                theme: 'dark',
+                
+                // 🎯 คุมตัวโหลดดิ้งเปิด/ปิด ผ่านชุด Event ดั้งเดิมที่เบราว์เซอร์รู้จักแน่นอน
+                initCallback: function(data) {
+                    document.getElementById('view-loading').style.display = 'none';
                 },
-                customData: { 
-                    user_id: userId, 
-                    device_id: deviceId 
-                },
-                customer: emailUser && emailUser.trim() !== '' ? { email: emailUser } : undefined
+                closeCallback: function(data) {
+                    document.getElementById('view-loading').style.display = 'none';
+                }
             });
         }
     </script>
