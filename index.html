@@ -137,7 +137,7 @@
                 <div class="plan-title" id="t-monthly">Monthly Plan</div>
                 <div class="plan-desc" id="d-monthly">Cancel anytime</div>
             </div>
-            <div class="plan-price" id="p-price-monthly">15.9 $</div>
+            <div class="plan-price" id="p-price-monthly">15.99 $</div>
         </div>
 
         <div class="plan-option" id="plan-yearly">
@@ -145,7 +145,7 @@
                 <div class="plan-title"><span id="t-yearly">Yearly Plan</span><span class="save-badge" id="b-yearly">Save 33%</span></div>
                 <div class="plan-desc" id="d-yearly">Best Value</div>
             </div>
-            <div class="plan-price" id="p-price-yearly">129.9 $</div>
+            <div class="plan-price" id="p-price-yearly">129.99 $</div>
         </div>
 
         <button class="btn-trial" id="btn-trial">Start 7-Day Free Trial</button>
@@ -162,8 +162,7 @@
         <div class="loader-box">
             <div class="loader"></div>
             <div class="loading-text">
-                <b style="color: white; font-size: 20px;">Auto RC PC</b><br><br>
-                <span id="load-msg">Connecting to Paddle's secure payment system...</span>
+                <b style="color: white; font-size: 20px;">Auto RC PC</b>
             </div>
         </div>
     </div>
@@ -199,40 +198,52 @@
 
         Paddle.Environment.set("sandbox");
         
-        // 📌 แก้ไขจุดนี้: ดักรับข้อมูลราคาจริงผ่านระบบ eventCallback ตอน Initialize ปลอดภัยที่สุด ไม่พังแน่นอน
         Paddle.Initialize({
             token: 'test_4c6336ab0eb5b58c83150a6fe29',
             eventCallback: function(data) {
-                // ดักจับเหตุการณ์การเปิดหน้าต่าง Checkout
-                if (data.event === 'Checkout.Loaded' || data.event === 'checkout.loaded') {
-                    // ปิดหน้าจอโหลดทันทีเมื่อกล่องป็อปอัปชำระเงินของ Paddle แสดงผลสมบูรณ์แบบ
+                console.log("=== PADDLE DEBUG EVENT TRIGGERED ===", data.event, data);
+
+                const targetCloseEvents = [
+                    'checkout.loaded', 'Checkout.Loaded',
+                    'checkout.rendering', 'Checkout.Rendering',
+                    'checkout.displayed', 'Checkout.Displayed',
+                    'checkout.opened', 'Checkout.Opened'
+                ];
+
+                if (targetCloseEvents.includes(data.event)) {
+                    console.log(`🎯 พบเจอ Event สำหรับสั่งปิดหน้าโหลด: ${data.event}`);
                     document.getElementById('view-loading').style.display = 'none';
                 }
             }
         });
 
-        // 📌 จุดยิงสเปกเสริมเพื่ออัปเดตราคาทันทีเมื่อมีข้อมูลราคาแฝงหลุดเข้ามาในหน้าจอ (สเปก v2/v3 Hybrid)
         if (typeof Paddle !== 'undefined') {
-            // การดึงราคาอ้อมของ Paddle v2 ใหม่ จะดึงผ่านการจำลองดรอปออบเจกต์เบื้องต้นลงในโครงสร้างหลัก
             try {
                 Paddle.Prices.Update({
                     prices: [ID_MONTHLY, ID_YEARLY],
                     success: function(pricesData) {
+                        console.log("=== 1. PADDLE METHOD PRICE DATA ===", pricesData);
                         if (pricesData && pricesData.products) {
                             pricesData.products.forEach(function(p) {
-                                if (p.id === ID_MONTHLY) document.getElementById('p-price-monthly').innerText = p.price;
-                                if (p.id === ID_YEARLY) document.getElementById('p-price-yearly').innerText = p.price;
+                                console.log(`[Method] สินค้าไอดี: ${p.id} -> โครงสร้างราคาข้างใน:`, p.price);
+                                let displayPrice = (typeof p.price === 'object') ? (p.price.gross || p.price.net) : p.price;
+                                
+                                if (p.id === ID_MONTHLY) document.getElementById('p-price-monthly').innerText = displayPrice;
+                                if (p.id === ID_YEARLY) document.getElementById('p-price-yearly').innerText = displayPrice;
                             });
                         }
                     }
                 });
             } catch(err) {
-                // แผนสำรองฉุกเฉิน: ถ้าคำสั่งราคาส่วนตัวติดขัด ให้ใช้ Fetch ยิงตรงไปเอาโครงราคาของ Sandbox มาโชว์โดยตรง
+                console.warn("ไม่สามารถอ่านราคาผ่านคลาสภายในของ Paddle ได้ สลับไปใช้ Fetch สำรอง...", err);
+                
                 fetch(`https://sandbox-checkout.paddle.com/api/2.0/prices?product_ids=${ID_MONTHLY},${ID_YEARLY}`)
                 .then(res => res.json())
                 .then(resData => {
+                    console.log("=== 2. PADDLE FETCH API FALLBACK DATA ===", resData);
                     if (resData && resData.response && resData.response.products) {
                         resData.response.products.forEach(function(prod) {
+                            console.log(`[Fetch] สินค้าไอดี: ${prod.product_id} -> ราคาคีย์ย่อย:`, prod.recurring_price);
                             if (prod.product_id.toString() === ID_MONTHLY) {
                                 document.getElementById('p-price-monthly').innerText = prod.recurring_price;
                             } else if (prod.product_id.toString() === ID_YEARLY) {
@@ -240,16 +251,13 @@
                             }
                         });
                     }
-                }).catch(e => console.log("Price fetch fallbacked."));
+                }).catch(fetchErr => console.error("Fetch ราคาล้มเหลวโดยสิ้นเชิง:", fetchErr));
             }
         }
 
-        // ลอจิกเปิดบิลอัตโนมัติเมื่อยิงลิงก์มาจากตัวแอป KMP เดสก์ท็อป
+        // ลอจิกเปิดบิลอัตโนมัติเมื่อยิงลิงก์มาจากตัวแอปเดสก์ท็อป
         if (priceId && priceId.trim() !== '' && priceId.startsWith('pri_')) {
             document.getElementById('view-loading').style.display = 'flex';
-            if (lang === 'thai') { 
-                document.getElementById('load-msg').innerText = "กำลังเชื่อมต่อกับระบบชำระเงิน Paddle ปลอดภัย..."; 
-            }
             setTimeout(() => { 
                 openCheckout([{ priceId: priceId, quantity: 1 }]); 
             }, 400);
@@ -278,10 +286,9 @@
                 return;
             }
             try {
-                // สั่งขึ้นหน้าโหลดรอชั่วคราวตอนกดปุ่มแบบแมนนวลเพื่อความสมูท
                 document.getElementById('view-loading').style.display = 'flex';
 
-                console.log("Payment Debug Data:", {
+                console.log("=== INITIATING CHECKOUT ===", {
                     items: items,
                     lang: lang,
                     userId: userId,
@@ -308,7 +315,6 @@
                     };
                 }
 
-                // สั่งเปิดหน้าต่างชำระเงิน (การปิดหน้าโหลดจะไปทำงานออโต้ใน eventCallback ของหน้าต่างหลักด้านบนอย่างแม่นยำ)
                 Paddle.Checkout.open(checkoutOptions);
               
             } catch (e) {
