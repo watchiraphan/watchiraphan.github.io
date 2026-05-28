@@ -172,15 +172,15 @@
             document.getElementById('lnk-terms').innerText = 'เงื่อนไขการบริการ';
         }
 
-        // 🛠️ จุดที่ 1: เปลี่ยนมาใช้ Paddle.Initialize() และระบุสภาพแวดล้อมให้ตรงล็อกตามสเปก v3 จริง ๆ
+        // 🛠️ แก้ไขจุดเปิดระบบ: สับคัตเอาต์ไปฝั่ง Sandbox ข้างนอก แล้วเหลือช่องใน Initialize แค่ token
         if (typeof Paddle !== 'undefined') {
+            Paddle.Environment.set('sandbox'); // สับสวิตช์เครือข่ายตรงนี้แทนการใส่ข้างในคีย์ตัวแปร
             Paddle.Initialize({ 
-                token: 'test_4c6336ab0eb5b58c83150a6fe29', // Client-side Token ของวิศวกร
-                environment: 'sandbox' // บังคับตัดการเชื่อมต่อไปยัง Sandbox เพื่อเคลียร์ปัญหา CORS 403
+                token: 'test_4c6336ab0eb5b58c83150a6fe29' // เก็บไว้แค่ token ตัวเดียวตามที่ Log ล่าสุดถามหา
             });
         }
 
-        // ลอจิกเปิดบิลอัตโนมัติจากในแอป
+        // ลоจิกเปิดบิลอัตโนมัติ
         if (priceId && priceId.trim() !== '' && priceId.startsWith('pri_')) {
             document.getElementById('view-plans').style.display = 'none';
             document.getElementById('view-loading').style.display = 'block';
@@ -190,12 +190,12 @@
             setTimeout(() => { openPaddle(priceId); }, 400);
         }
 
-        // จับเหตุการณ์ปุ่มกดเลือกแพ็กเกจ (ใช้ UI เดิมที่วิศวกรออกแบบไว้)
+        // ผูก Event Click สไตล์คัสตอมปุ่มสวยของวิศวกร
         document.querySelectorAll('.plan-option').forEach(function(el) {
             el.addEventListener('click', function() {
-                let selectedId = 'pri_01ksm1vzz6zg2hayb8zmenvnb4'; // ไอดีรายเดือน Sandbox ของวิศวกร
+                let selectedId = 'pri_01ksm1vzz6zg2hayb8zmenvnb4'; // ไอดีรายเดือน Sandbox
                 if (this.id === 'plan-yearly') {
-                    selectedId = 'pri_01ksm1s4zxbadbeaxhbp3rg3fz'; // ไอดีรายปี Sandbox ของวิศวกร
+                    selectedId = 'pri_01ksm1s4zxbadbeaxhbp3rg3fz'; // ไอดีรายปี Sandbox
                 }
                 openPaddle(selectedId);
             });
@@ -204,11 +204,11 @@
         const trialBtn = document.getElementById('btn-trial');
         if (trialBtn) {
             trialBtn.addEventListener('click', function() {
-                openPaddle('pri_01ksm1s4zxbadbeaxhbp3rg3fz'); // ไอดีรายปีที่มี Trial
+                openPaddle('pri_01ksm1s4zxbadbeaxhbp3rg3fz');
             });
         }
 
-        // 🛠️ จุดที่ 2: ใช้รูปแบบ Paddle.Checkout.open() ที่ถูกต้องสำหรับสเปก Initialize
+        // ฟังก์ชันส่งกระสุนข้อมูลเข้าหน้าต่างเปิด Checkout
         function openPaddle(targetPriceId) {
             if (typeof Paddle === 'undefined') {
                 alert(lang === 'thai' ? "ไม่สามารถเรียกใช้งานระบบชำระเงินได้ กรุณาปิดตัวบล็อกโฆษณา" : "Checkout error. Please disable AdBlocker.");
