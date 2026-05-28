@@ -229,14 +229,14 @@
           }
         
           // open checkout
-          function openCheckout(items){
+          function openCheckout2(items){
             Paddle.Checkout.open({
               items: items,
               customer: customer
             });
           }
         // ✅ ฟังก์ชันเปิดหน้าต่างแบบคู่มือเป๊ะๆ รับตัวแปรอาร์เรย์ items ไปสั่งเปิดโดยตรง 
-        function openCheckout2(items) {
+        function openCheckout(items) {
             if (typeof Paddle === 'undefined') {
                 alert(lang === 'thai' ? "ไม่สามารถเรียกใช้งานระบบชำระเงินได้ กรุณาปิดตัวบล็อกโฆษณา" : "Checkout error. Please disable AdBlocker.");
                 return;
