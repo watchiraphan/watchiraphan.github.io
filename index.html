@@ -1,235 +1,191 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Auto RC PC - Premium Upgrade</title>
-   <script src="https://cdn.paddle.com/paddle/v3/paddle.js"></script>
-    <style>
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
-            background-color: #000000; 
-            background-image: url('pic_autorc.png'); 
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            background-attachment: fixed;
-            color: #CAF8F4; 
-            margin: 0; 
-            display: flex; 
-            justify-content: flex-start; 
-            align-items: center; 
-            min-height: 100vh; 
-        }
+<script src="https://cdn.paddle.com/paddle/paddle.js"></script>
 
-        .card-plans { 
-            background: rgba(17, 17, 17, 0.6); 
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            padding: 30px; 
-            border-radius: 16px; 
-            border: 1px solid rgba(85, 255, 255, 0.2); 
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5); 
-            max-width: 450px; 
-            width: 90%; 
-            text-align: center;
-            display: block; 
-            margin-left: 50px; 
-        }
+<script>
+    const urlParams = new URLSearchParams(window.location.search);
 
-        h1 { color: #55FFFF; margin-bottom: 20px; font-size: 24px; font-weight: bold; }
-        .features-list { text-align: left; margin: 20px auto; max-width: 380px; }
-        .feature-item { display: flex; align-items: center; margin-bottom: 12px; font-size: 14px; color: #CAF8F4; }
-        .feature-icon { color: #55FFFF; margin-right: 12px; font-size: 20px; flex-shrink: 0; }
+    let priceId = urlParams.get('price_id') || '';
+    const userId = urlParams.get('user_id') || 'review_user';
+    const deviceId = urlParams.get('device_id') || 'review_device';
+    const lang = urlParams.get('lang') || 'en';
 
-        .plan-option {
-            background: rgba(26, 26, 26, 0.7); 
-            border: 2px solid #333333; 
-            border-radius: 12px; 
-            padding: 18px;
-            margin-bottom: 14px; 
-            text-align: left; 
-            cursor: pointer; 
-            transition: all 0.2s ease;
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center;
-        }
-        .plan-option:hover {
-            border-color: #55FFFF;
-            background: rgba(17, 24, 39, 0.8);
-            transform: translateY(-1px);
-        }
-        .plan-option * { pointer-events: none; } 
-        
-        .plan-title { font-weight: bold; font-size: 16px; color: #ffffff; }
-        .plan-desc { font-size: 12px; color: #94a3b8; margin-top: 4px; }
-        .save-badge { background: #22c55e; color: #ffffff; font-size: 11px; padding: 2px 6px; border-radius: 4px; margin-left: 8px; }
-        .plan-price { font-size: 20px; font-weight: bold; color: #55FFFF; }
+    // =========================
+    // LANGUAGE
+    // =========================
+    if (lang === 'thai') {
+        document.getElementById('ui-title').innerText = 'อัปเกรดเป็นเวอร์ชัน Pro';
+        document.getElementById('f1').innerText = 'เข้าถึงทุกโมดูลการออกแบบโครงสร้าง';
+        document.getElementById('f2').innerText = 'ส่งออกรายการคำนวณ, รายการตัดเหล็ก, ใบประมาณราคา';
+        document.getElementById('f3').innerText = 'ส่งออกโมเดลโครงสร้าง และ ไฟล์ CAD';
 
-        .btn-trial { 
-            background: transparent; 
-            color: #55FFFF; 
-            border: 1px solid #55FFFF; 
-            border-radius: 12px; 
-            width: 100%; 
-            padding: 14px; 
-            font-size: 15px; 
-            font-weight: bold; 
-            cursor: pointer; 
-            margin-top: 10px; 
-            transition: all 0.2s ease;
-        }
-        .btn-trial:hover { 
-            background: rgba(85, 255, 255, 0.1); 
-            transform: translateY(-1px);
-        }
+        document.getElementById('t-monthly').innerText = 'สมาชิกรายเดือน';
+        document.getElementById('d-monthly').innerText = 'ยกเลิกได้ทุกเมื่อ';
 
-        .footer-links { display: flex; justify-content: space-evenly; margin-top: 30px; font-size: 11px; }
-        .footer-links a { color: #64748b; text-decoration: underline; cursor: pointer; }
+        document.getElementById('t-yearly').innerText = 'สมาชิกรายปี';
+        document.getElementById('b-yearly').innerText = 'ประหยัด 33%';
+        document.getElementById('d-yearly').innerText = 'คุ้มค่าที่สุด';
 
-        .card-loading {
-            background: rgba(17, 17, 17, 0.6); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-            padding: 30px; border-radius: 16px; border: 1px solid rgba(85, 255, 255, 0.2); box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5); 
-            max-width: 450px; width: 90%; text-align: center; display: none; margin-left: 50px; 
-        }
-        .loader { border: 4px solid #222222; border-top: 4px solid #55FFFF; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 0 auto 20px; }
-        .loading-text { color: #cbd5e1; font-size: 16px; line-height: 1.6; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        document.getElementById('btn-trial').innerText = 'เริ่มทดลองใช้ฟรี 7 วัน';
 
-        @media (max-width: 600px) {
-            body { justify-content: center; }
-            .card-plans, .card-loading { margin-left: 0; }
-        }
-    </style>
-</head>
-<body>
+        document.getElementById('lnk-restore').innerText = 'กู้คืนรายการ';
+        document.getElementById('lnk-refund').innerText = 'นโยบายการคืนเงิน';
+        document.getElementById('lnk-privacy').innerText = 'ความเป็นส่วนตัว';
+        document.getElementById('lnk-terms').innerText = 'เงื่อนไขการบริการ';
+    }
 
-    <div id="view-plans" class="card-plans">
-        <h1 id="ui-title">Upgrade to Pro</h1>
-        <div class="features-list">
-            <div class="feature-item"><span class="feature-icon">🔓</span><span id="f1">Full access to all Structural Modules</span></div>
-            <div class="feature-item"><span class="feature-icon">📄</span><span id="f2">Export Calculation, Bar Cut List, BOQ Report</span></div>
-            <div class="feature-item"><span class="feature-icon">🏢</span><span id="f3">Export Structural Model and CAD Drawing</span></div>
-        </div>
+    // =========================
+    // CHECK PADDLE SDK
+    // =========================
+    function waitForPaddle(callback, retry = 0) {
 
-        <div class="plan-option" id="plan-monthly">
-            <div>
-                <div class="plan-title" id="t-monthly">Monthly Plan</div>
-                <div class="plan-desc" id="d-monthly">Cancel anytime</div>
-            </div>
-            <div class="plan-price">15.99 $</div>
-        </div>
-
-        <div class="plan-option" id="plan-yearly">
-            <div>
-                <div class="plan-title"><span id="t-yearly">Yearly Plan</span><span class="save-badge" id="b-yearly">Save 33%</span></div>
-                <div class="plan-desc" id="d-yearly">Best Value</div>
-            </div>
-            <div class="plan-price">129.99 $</div>
-        </div>
-
-        <button class="btn-trial" id="btn-trial">Start 7-Day Free Trial</button>
-
-        <div class="footer-links">
-            <a id="lnk-restore" onclick="alert('System is processing item restoration...')">Restore Purchase</a>
-            <a href="https://autorc-design.carrd.co/#refund" target="_blank" id="lnk-refund">Refund Policy</a>
-            <a href="https://autorc-design.carrd.co/#privacy" target="_blank" id="lnk-privacy">Privacy</a>
-            <a href="https://autorc-design.carrd.co/#terms" target="_blank" id="lnk-terms">Terms of Service</a>
-        </div>
-    </div>
-
-    <div id="view-loading" class="card-loading">
-        <div class="loader"></div>
-        <div class="loading-text">
-            <b style="color: white; font-size: 20px;">Auto RC PC</b><br><br>
-            <span id="load-msg">Connecting to Paddle's secure payment system...</span>
-        </div>
-    </div>
-
-    <script>
-        const urlParams = new URLSearchParams(window.location.search);
-        let priceId = urlParams.get('price_id') || '';
-        const userId = urlParams.get('user_id') || 'review_user';
-        const deviceId = urlParams.get('device_id') || 'review_device';
-        const lang = urlParams.get('lang') || 'en'; 
-
-        if (lang === 'thai') {
-            document.getElementById('ui-title').innerText = 'อัปเกรดเป็นเวอร์ชัน Pro';
-            document.getElementById('f1').innerText = 'เข้าถึงทุกโมดูลการออกแบบโครงสร้าง';
-            document.getElementById('f2').innerText = 'ส่งออกรายการคำนวณ, รายการตัดเหล็ก, ใบประมาณราคา';
-            document.getElementById('f3').innerText = 'ส่งออกโมเดลโครงสร้าง และ ไฟล์ CAD';
-            document.getElementById('t-monthly').innerText = 'สมาชิกรายเดือน';
-            document.getElementById('d-monthly').innerText = 'ยกเลิกได้ทุกเมื่อ';
-            document.getElementById('t-yearly').innerText = 'สมาชิกรายปี';
-            document.getElementById('b-yearly').innerText = 'ประหยัด 33%';
-            document.getElementById('d-yearly').innerText = 'คุ้มค่าที่สุด';
-            document.getElementById('btn-trial').innerText = 'เริ่มทดลองใช้ฟรี 7 วัน';
-            document.getElementById('lnk-restore').innerText = 'กู้คืนรายการ';
-            document.getElementById('lnk-restore').setAttribute('onclick', "alert('ระบบกำลังดำเนินการกู้คืนรายการ...')");
-            document.getElementById('lnk-refund').innerText = 'นโยบายการคืนเงิน';
-            document.getElementById('lnk-privacy').innerText = 'ความเป็นส่วนตัว';
-            document.getElementById('lnk-terms').innerText = 'เงื่อนไขการบริการ';
-        }
-
-        // เริ่มต้นการใช้งานเอนจิ้น Paddle
         if (typeof Paddle !== 'undefined') {
-            Paddle.Setup({ 
+            callback();
+            return;
+        }
+
+        if (retry > 20) {
+            alert(
+                lang === 'thai'
+                ? 'ไม่สามารถโหลดระบบชำระเงินได้ กรุณาปิด AdBlock หรือเปลี่ยน Browser'
+                : 'Unable to load payment system. Please disable AdBlock.'
+            );
+            return;
+        }
+
+        setTimeout(() => {
+            waitForPaddle(callback, retry + 1);
+        }, 300);
+    }
+
+    // =========================
+    // INIT PADDLE
+    // =========================
+    waitForPaddle(() => {
+
+        try {
+
+            Paddle.Environment.set("sandbox");
+
+            Paddle.Initialize({
                 token: 'test_4c6336ab0eb5b58c83150a6fe29',
-                settings: {
-                    locale: lang === 'thai' ? 'th' : 'en'
-                }
-            });
-        }
 
-        // ลอจิกเปิดบิลอัตโนมัติ (หากยิงค่าเปิดตรงมาจากในแอปพลิเคชัน)
-        if (priceId && priceId.trim() !== '' && priceId.startsWith('pri_')) {
-            document.getElementById('view-plans').style.display = 'none';
-            document.getElementById('view-loading').style.display = 'block';
-            if (lang === 'thai') { 
-                document.getElementById('load-msg').innerText = "กำลังเชื่อมต่อกับระบบชำระเงิน Paddle ปลอดภัย..."; 
-            }
-            setTimeout(() => { openPaddle(priceId); }, 400);
-        }
-
-        // จัดการเหตุการณ์เมื่อคลิกเลือกแพ็กเกจรายเดือน / รายปี แบบแมนนวล
-        document.querySelectorAll('.plan-option').forEach(function(el) {
-            el.addEventListener('click', function() {
-                let selectedId = 'pri_01ksm1vzz6zg2hayb8zmenvnb4'; // ไอดีรายเดือน
-                if (this.id === 'plan-yearly') {
-                    selectedId = 'pri_01ksm1s4zxbadbeaxhbp3rg3fz'; // ไอดีรายปี
-                }
-                openPaddle(selectedId);
-            });
-        });
-
-        // ปุ่มเริ่มทดลองใช้งานฟรี 7 วัน (ผูกกับแพ็กเกจรายปีที่มี Trial)
-        const trialBtn = document.getElementById('btn-trial');
-        if (trialBtn) {
-            trialBtn.addEventListener('click', function() {
-                openPaddle('pri_01ksm1s4zxbadbeaxhbp3rg3fz');
-            });
-        }
-
-        // ฟังก์ชันหลักในการเปิดหน้าต่างป๊อปอัปชำระเงิน (Paddle Checkout)
-        function openPaddle(targetPriceId) {
-            if (typeof Paddle === 'undefined') {
-                alert(lang === 'thai' ? "ไม่สามารถเรียกใช้งานระบบชำระเงินได้ กรุณาปิดตัวบล็อกโฆษณา (AdBlocker) แล้วลองใหม่อีกครั้ง" : "Checkout error. Please disable AdBlocker and try again.");
-                return;
-            }
-            try {
-                Paddle.Checkout.open({
-                    settings: { 
+                checkout: {
+                    settings: {
                         displayMode: "overlay",
                         locale: lang === 'thai' ? 'th' : 'en'
-                    },
-                    items: [{ priceId: targetPriceId, quantity: 1 }],
-                    customData: { user_id: userId, device_id: deviceId }
-                });
-            } catch (e) {
-                alert(lang === 'thai' ? "เกิดข้อผิดพลาดในการเปิดระบบชำระเงิน กรุณาลองใหม่อีกครั้ง" : "Error opening checkout. Please try again.");
+                    }
+                }
+            });
+
+            console.log("Paddle initialized");
+
+            // AUTO OPEN
+            if (
+                priceId &&
+                priceId.trim() !== '' &&
+                priceId.startsWith('pri_')
+            ) {
+
+                document.getElementById('view-plans').style.display = 'none';
+                document.getElementById('view-loading').style.display = 'block';
+
+                if (lang === 'thai') {
+                    document.getElementById('load-msg').innerText =
+                        'กำลังเชื่อมต่อกับระบบชำระเงิน Paddle...';
+                }
+
+                setTimeout(() => {
+                    openPaddle(priceId);
+                }, 400);
             }
+
+        } catch (e) {
+
+            console.error(e);
+
+            alert(
+                lang === 'thai'
+                ? 'เกิดข้อผิดพลาดในการเริ่มระบบชำระเงิน'
+                : 'Payment system initialization error'
+            );
         }
-    </script>
-</body>
-</html>
+    });
+
+    // =========================
+    // PLAN BUTTONS
+    // =========================
+    document.querySelectorAll('.plan-option').forEach(function(el) {
+
+        el.addEventListener('click', function() {
+
+            let selectedId = 'pri_01ksm1vzz6zg2hayb8zmenvnb4';
+
+            if (this.id === 'plan-yearly') {
+                selectedId = 'pri_01ksm1s4zxbadbeaxhbp3rg3fz';
+            }
+
+            openPaddle(selectedId);
+        });
+    });
+
+    // =========================
+    // FREE TRIAL BUTTON
+    // =========================
+    const trialBtn = document.getElementById('btn-trial');
+
+    if (trialBtn) {
+
+        trialBtn.addEventListener('click', function() {
+            openPaddle('pri_01ksm1s4zxbadbeaxhbp3rg3fz');
+        });
+    }
+
+    // =========================
+    // OPEN CHECKOUT
+    // =========================
+    function openPaddle(targetPriceId) {
+
+        if (typeof Paddle === 'undefined') {
+
+            alert(
+                lang === 'thai'
+                ? 'ไม่สามารถโหลดระบบชำระเงินได้ กรุณาปิด AdBlock'
+                : 'Unable to load payment system.'
+            );
+
+            return;
+        }
+
+        try {
+
+            Paddle.Checkout.open({
+
+                items: [
+                    {
+                        priceId: targetPriceId,
+                        quantity: 1
+                    }
+                ],
+
+                settings: {
+                    displayMode: "overlay",
+                    locale: lang === 'thai' ? 'th' : 'en'
+                },
+
+                customData: {
+                    user_id: userId,
+                    device_id: deviceId
+                }
+            });
+
+        } catch (e) {
+
+            console.error(e);
+
+            alert(
+                lang === 'thai'
+                ? 'ไม่สามารถเปิดระบบชำระเงินได้'
+                : 'Unable to open checkout.'
+            );
+        }
+    }
+</script>
